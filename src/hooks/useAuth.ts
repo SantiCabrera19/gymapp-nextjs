@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { getCurrentSession, getUserProfile, syncGoogleProfile } from '@/lib/api/auth'
-import type { User, Session } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database'
 
 export interface AuthState {
@@ -12,22 +12,85 @@ export interface AuthState {
   session: Session | null
   loading: boolean
   isAuthenticated: boolean
+  updateProfile: (updatedProfile: Partial<Tables<'users'>>) => void
 }
 
-export function useAuth(): AuthState {
-  const [state, setState] = useState<AuthState>({
+// Estado global para sincronizar entre todas las instancias
+let globalAuthState: AuthState | null = null
+let listeners: Set<(state: AuthState) => void> = new Set()
+
+// Función helper para crear estado completo
+const createAuthState = (partial: Partial<AuthState>): AuthState => {
+  const updateProfile = (updatedProfile: Partial<Tables<'users'>>) => {
+    if (globalAuthState?.profile) {
+      updateGlobalState({
+        profile: { ...globalAuthState.profile, ...updatedProfile }
+      })
+    }
+  }
+
+  return {
     user: null,
     profile: null,
     session: null,
     loading: true,
     isAuthenticated: false,
+    updateProfile,
+    ...partial,
+  }
+}
+
+// Función para actualizar estado global y notificar a todos los listeners
+const updateGlobalState = (newState: Partial<AuthState>) => {
+  const fullState = createAuthState(newState)
+  globalAuthState = fullState
+  listeners.forEach(listener => listener(fullState))
+}
+
+export function useAuth(): AuthState {
+  const [state, setState] = useState<AuthState>(() => {
+    // Si ya hay estado global, usarlo
+    if (globalAuthState) {
+      return globalAuthState
+    }
+    // Estado inicial
+    return {
+      user: null,
+      profile: null,
+      session: null,
+      loading: true,
+      isAuthenticated: false,
+      updateProfile: () => {},
+    }
   })
 
+  // Registrar listener para sincronización
   useEffect(() => {
-    // Obtener sesión inicial
+    listeners.add(setState)
+    
+    // Si ya hay estado global, sincronizar inmediatamente
+    if (globalAuthState) {
+      setState(globalAuthState)
+    }
+
+    return () => {
+      listeners.delete(setState)
+    }
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+
+    // Solo ejecutar la inicialización una vez globalmente
+    if (globalAuthState) {
+      return
+    }
+
     const getInitialSession = async () => {
       try {
         const session = await getCurrentSession()
+        
+        if (!mounted) return
         
         if (session?.user) {
           // Si es usuario de Google, sincronizar datos
@@ -44,18 +107,31 @@ export function useAuth(): AuthState {
             profile = await getUserProfile(session.user.id)
           }
           
-          // Pequeña pausa para mostrar el loading state
-          await new Promise(resolve => setTimeout(resolve, 400))
           
-          setState({
-            user: session.user,
-            profile,
-            session,
-            loading: false,
-            isAuthenticated: true,
-          })
+          if (mounted) {
+            updateGlobalState({
+              user: session.user,
+              profile,
+              session,
+              loading: false,
+              isAuthenticated: true,
+            })
+          }
         } else {
-          setState({
+          if (mounted) {
+            updateGlobalState({
+              user: null,
+              profile: null,
+              session: null,
+              loading: false,
+              isAuthenticated: false,
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error)
+        if (mounted) {
+          updateGlobalState({
             user: null,
             profile: null,
             session: null,
@@ -63,15 +139,6 @@ export function useAuth(): AuthState {
             isAuthenticated: false,
           })
         }
-      } catch (error) {
-        console.error('Error getting initial session:', error)
-        setState({
-          user: null,
-          profile: null,
-          session: null,
-          loading: false,
-          isAuthenticated: false,
-        })
       }
     }
 
@@ -82,7 +149,7 @@ export function useAuth(): AuthState {
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           // Mantener loading durante la sincronización
-          setState(prev => ({ ...prev, loading: true }))
+          updateGlobalState({ loading: true })
           
           // Si es login con Google, sincronizar datos
           if (session.user.app_metadata?.provider === 'google') {
@@ -98,10 +165,7 @@ export function useAuth(): AuthState {
             profile = await getUserProfile(session.user.id)
           }
           
-          // Pequeña pausa para mostrar el loading state
-          await new Promise(resolve => setTimeout(resolve, 500))
-          
-          setState({
+          updateGlobalState({
             user: session.user,
             profile,
             session,
@@ -109,7 +173,7 @@ export function useAuth(): AuthState {
             isAuthenticated: true,
           })
         } else if (event === 'SIGNED_OUT') {
-          setState({
+          updateGlobalState({
             user: null,
             profile: null,
             session: null,
@@ -117,19 +181,27 @@ export function useAuth(): AuthState {
             isAuthenticated: false,
           })
         } else if (event === 'TOKEN_REFRESHED' && session) {
-          setState(prev => ({
-            ...prev,
+          updateGlobalState({
             session,
             user: session.user,
-          }))
+          })
         }
       }
     )
 
     return () => {
+      mounted = false
       subscription.unsubscribe()
     }
   }, [])
 
-  return state
+  const updateProfile = (updatedProfile: Partial<Tables<'users'>>) => {
+    if (globalAuthState?.profile) {
+      updateGlobalState({
+        profile: { ...globalAuthState.profile, ...updatedProfile }
+      })
+    }
+  }
+
+  return { ...state, updateProfile }
 }

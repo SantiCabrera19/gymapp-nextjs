@@ -1,7 +1,7 @@
 'use client'
 
 import { Search, Bell, Menu, LogOut, User } from 'lucide-react'
-import { Button, Avatar, SearchBar, HeaderProfileSkeleton } from '@/components/ui'
+import { Button, Avatar, SearchBar } from '@/components/ui'
 import { useAuth } from '@/hooks'
 import { signOut } from '@/lib/api/auth'
 import { useRouter } from 'next/navigation'
@@ -11,8 +11,9 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const { isAuthenticated, profile, loading } = useAuth()
+  const { isAuthenticated, profile } = useAuth()
   const router = useRouter()
+  
 
   const handleSignOut = async () => {
     await signOut()
@@ -45,9 +46,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           </Button>
 
           {/* User menu */}
-          {loading ? (
-            <HeaderProfileSkeleton />
-          ) : isAuthenticated ? (
+          {isAuthenticated ? (
             <div className="flex items-center gap-3">
               <Avatar 
                 size="sm" 

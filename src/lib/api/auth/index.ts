@@ -151,12 +151,19 @@ export async function syncGoogleProfile(user: any): Promise<void> {
 
     if (existingProfile && !fetchError) {
       // Actualizar perfil existente
+      const updateData: any = {
+        full_name: profileData.full_name,
+      }
+
+      // Solo actualizar avatar si no tiene uno personalizado
+      // (si es null o si es de Google)
+      if (!existingProfile.avatar_url || existingProfile.avatar_url.includes('googleusercontent.com')) {
+        updateData.avatar_url = profileData.avatar_url
+      }
+
       const { error: updateError } = await supabase
         .from('users')
-        .update({
-          full_name: profileData.full_name,
-          avatar_url: profileData.avatar_url,
-        })
+        .update(updateData)
         .eq('id', userId)
 
       if (updateError) {

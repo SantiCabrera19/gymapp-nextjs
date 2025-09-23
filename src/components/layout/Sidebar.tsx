@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Button, Avatar, ProfileSkeleton } from '@/components/ui'
+import { Button, Avatar } from '@/components/ui'
 import { useAuth } from '@/hooks'
 import { WorkoutTimer } from '@/components/workout'
 import { 
@@ -60,7 +60,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 }
 
 function SidebarContent({ pathname }: { pathname: string }) {
-  const { isAuthenticated, profile, loading } = useAuth()
+  const { isAuthenticated, profile } = useAuth()
+  
   
   // Training state - TODO: implement real training state
   const isTraining = false
@@ -126,9 +127,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
               ) : null}
 
               {/* User Profile Section - Show below Configuration when authenticated */}
-              {loading ? (
-                <ProfileSkeleton />
-              ) : isAuthenticated ? (
+              {isAuthenticated ? (
                 <div className="rounded-lg bg-background-tertiary/50 p-4">
                   <div className="flex items-center gap-3">
                     <Avatar 
@@ -152,14 +151,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
               ) : null}
 
               {/* User section */}
-              {loading ? (
-                <div className="rounded-lg bg-background-tertiary/50 p-4">
-                  <div className="animate-pulse space-y-2">
-                    <div className="h-4 bg-background-tertiary rounded w-3/4"></div>
-                    <div className="h-3 bg-background-tertiary rounded w-1/2"></div>
-                  </div>
-                </div>
-              ) : !isAuthenticated ? (
+              {!isAuthenticated ? (
                 <div className="space-y-3">
                   <div className="rounded-lg bg-background-tertiary/50 p-4">
                     <h3 className="text-sm font-medium text-text-primary mb-2">¡Bienvenido a GymApp!</h3>
