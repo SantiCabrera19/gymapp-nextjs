@@ -16,8 +16,21 @@ export function Header({ onMenuClick }: HeaderProps) {
   
 
   const handleSignOut = async () => {
-    await signOut()
-    router.push('/')
+    try {
+      const result = await signOut()
+      if (result.success) {
+        // Forzar navegación inmediata a login
+        window.location.href = '/auth/login'
+      } else {
+        console.error('Error al cerrar sesión:', result.error)
+        // Aún así redirigir en caso de error
+        window.location.href = '/auth/login'
+      }
+    } catch (error) {
+      console.error('Error inesperado al cerrar sesión:', error)
+      // Aún así redirigir en caso de error
+      window.location.href = '/auth/login'
+    }
   }
 
   return (
