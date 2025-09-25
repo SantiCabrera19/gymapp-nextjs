@@ -14,3 +14,18 @@ export type {
   RecordType,
   ProgressTrend
 } from './user-exercises'
+export type {
+  WorkoutSession,
+  ExerciseSet,
+  ActiveWorkoutSession,
+  WorkoutExercise,
+  ExerciseSetWithHistory,
+  WorkoutSummary,
+  TimerState,
+  WorkoutTimers,
+  SetFormData,
+  WorkoutFormData,
+  SetType,
+  WorkoutStatus,
+  RestTimerPreset
+} from './training'

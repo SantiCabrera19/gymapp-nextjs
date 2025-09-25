@@ -25,7 +25,7 @@ interface SidebarProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-sky-400' },
   { name: 'Rutinas', href: '/routines', icon: Calendar, color: 'text-amber-400' },
-  { name: 'Entrenar', href: '/workout', icon: Play, color: 'text-emerald-400' },
+  { name: 'Entrenar', href: '/training', icon: Play, color: 'text-emerald-400' },
   { name: 'Ejercicios', href: '/exercises', icon: Dumbbell, color: 'text-violet-400' },
   { name: 'Progreso', href: '/progress', icon: TrendingUp, color: 'text-blue-400' },
   { name: 'Perfil', href: '/profile', icon: User, color: 'text-pink-400' },

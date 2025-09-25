@@ -11,3 +11,8 @@ export {
   useExerciseFavorite,
   useExerciseDetail 
 } from './useExerciseData'
+export {
+  useTraining,
+  useWorkoutTimers,
+  useExerciseHistory
+} from './useTraining'

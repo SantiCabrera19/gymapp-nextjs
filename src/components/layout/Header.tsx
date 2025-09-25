@@ -81,10 +81,19 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                asChild
+                className="transition-all duration-200 hover:scale-105 active:scale-95 hover:bg-white/10"
+              >
                 <a href="/auth/login">Iniciar Sesión</a>
               </Button>
-              <Button size="sm" asChild>
+              <Button 
+                size="sm" 
+                asChild
+                className="transition-all duration-200 hover:scale-105 active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl border-0"
+              >
                 <a href="/auth/register">Registrarse</a>
               </Button>
             </div>
