@@ -12,13 +12,19 @@ interface ExerciseCardProps {
   onToggleFavorite?: (id: string) => void
   onViewDetails?: (exercise: Exercise) => void
   onAddToRoutine?: (exercise: Exercise) => void
+  compact?: boolean
+  showAddButton?: boolean
+  isSelected?: boolean
 }
 
 export function ExerciseCard({ 
   exercise, 
   onToggleFavorite, 
   onViewDetails,
-  onAddToRoutine 
+  onAddToRoutine,
+  compact = false,
+  showAddButton = true,
+  isSelected = false
 }: ExerciseCardProps) {
   const [imageError, setImageError] = useState(false)
   const router = useRouter()

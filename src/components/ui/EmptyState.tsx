@@ -38,7 +38,10 @@ export function EmptyState({
       </p>
       
       {action && (
-        <Button onClick={action.onClick}>
+        <Button 
+          onClick={action.onClick}
+          className="transition-all duration-200 hover:scale-105 active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl"
+        >
           {action.label}
         </Button>
       )}

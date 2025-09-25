@@ -13,7 +13,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background-primary">
+    <div className="min-h-screen bg-background-primary flex flex-col">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -29,16 +29,18 @@ export function AppLayout({ children }: AppLayoutProps) {
       />
 
       {/* Main content */}
-      <div className="lg:pl-64 pt-16">
+      <div className="lg:pl-64 pt-16 flex flex-col min-h-screen">
         {/* Header */}
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
         {/* Page content */}
-        <main className="px-5 py-6 sm:px-6 lg:px-8">
+        <main className="flex-1 px-5 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             {children}
           </div>
         </main>
+        
+        {/* Footer siempre abajo */}
         <Footer />
       </div>
     </div>
