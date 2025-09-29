@@ -19,14 +19,18 @@ export function Pagination({
   onPageChange,
   hasNextPage,
   hasPrevPage,
-  className
+  className,
 }: PaginationProps) {
   const getVisiblePages = () => {
     const delta = 2
     const range = []
     const rangeWithDots = []
 
-    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
       range.push(i)
     }
 
@@ -50,7 +54,7 @@ export function Pagination({
   if (totalPages <= 1) return null
 
   return (
-    <div className={cn("flex items-center justify-center space-x-2", className)}>
+    <div className={cn('flex items-center justify-center space-x-2', className)}>
       {/* Previous button */}
       <Button
         variant="outline"
@@ -71,7 +75,7 @@ export function Pagination({
             </div>
           ) : (
             <Button
-              variant={currentPage === page ? "default" : "outline"}
+              variant={currentPage === page ? 'default' : 'outline'}
               size="sm"
               onClick={() => onPageChange(page as number)}
               className="h-9 w-9 p-0"

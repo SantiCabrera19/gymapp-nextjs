@@ -36,7 +36,7 @@ export function useProfileForm() {
         experience_level: profile.experience_level || 'beginner',
         preferred_units: profile.preferred_units || 'metric',
         timezone: profile.timezone || 'America/Argentina/Buenos_Aires',
-        avatar_url: profile.avatar_url || ''
+        avatar_url: profile.avatar_url || '',
       }
       setFormData(initialData)
       setOriginalData(initialData)
@@ -45,13 +45,16 @@ export function useProfileForm() {
 
   const isDirty = JSON.stringify(formData) !== JSON.stringify(originalData)
 
-  const updateField = useCallback((field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
-    }
-  }, [errors])
+  const updateField = useCallback(
+    (field: string, value: any) => {
+      setFormData(prev => ({ ...prev, [field]: value }))
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: undefined }))
+      }
+    },
+    [errors]
+  )
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -85,7 +88,7 @@ export function useProfileForm() {
     try {
       const { confirmEmail, ...dataToSave } = formData
       const result = await updateUserProfile(user.id, dataToSave)
-      
+
       if (result.success) {
         setOriginalData(formData)
         showSuccess('Perfil actualizado correctamente')
@@ -111,6 +114,6 @@ export function useProfileForm() {
     isDirty,
     updateField,
     handleSave,
-    resetForm
+    resetForm,
   }
 }

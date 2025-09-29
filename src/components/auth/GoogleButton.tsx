@@ -16,7 +16,7 @@ export function GoogleButton({ children, onClick, disabled, className }: GoogleB
 
   const handleClick = async () => {
     if (disabled || isLoading) return
-    
+
     setIsLoading(true)
     try {
       await onClick?.()
@@ -30,9 +30,9 @@ export function GoogleButton({ children, onClick, disabled, className }: GoogleB
       variant="outline"
       size="lg"
       className={cn(
-        "w-full relative overflow-hidden group",
-        "border-border-primary hover:border-border-secondary",
-        "bg-white/5 hover:bg-white/10",
+        'w-full relative overflow-hidden group',
+        'border-border-primary hover:border-border-secondary',
+        'bg-white/5 hover:bg-white/10',
         className
       )}
       onClick={handleClick}
@@ -60,12 +60,10 @@ export function GoogleButton({ children, onClick, disabled, className }: GoogleB
             />
           </svg>
         </div>
-        
-        <span className="font-medium">
-          {isLoading ? 'Conectando...' : children}
-        </span>
+
+        <span className="font-medium">{isLoading ? 'Conectando...' : children}</span>
       </div>
-      
+
       {/* Loading overlay */}
       {isLoading && (
         <div className="absolute inset-0 bg-background-tertiary/50 flex items-center justify-center">

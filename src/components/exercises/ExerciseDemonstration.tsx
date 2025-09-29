@@ -63,7 +63,7 @@ export function ExerciseDemonstration({ exercise, showTechnique }: ExerciseDemon
                   >
                     {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                   </Button>
-                  
+
                   <Button
                     size="sm"
                     variant="secondary"

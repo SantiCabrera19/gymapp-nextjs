@@ -2,404 +2,229 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from './useAuth'
+import { useLoadingTimeout } from './useLoadingTimeout'
+import { useRouter } from 'next/navigation'
+import { WorkoutSession } from '@/types/training'
 import {
   createWorkoutSession,
-  getActiveWorkoutSession
-} from '@/lib/api/training-simple'
-import type {
-  WorkoutSession,
-  ExerciseSet,
-  ActiveWorkoutSession,
-  WorkoutTimers,
-  TimerState,
-  SetFormData,
-  WorkoutFormData,
-  RestTimerPreset,
-  SET_TYPES
-} from '@/types/training'
+  getActiveWorkoutSession,
+  completeWorkoutSession,
+  cancelWorkoutSession,
+} from '@/lib/api/training'
 import { WORKOUT_STATUS } from '@/types/training'
 
 // =====================================================
-// HOOK PRINCIPAL DE TRAINING
+// HOOK ROBUSTO DE TRAINING - SIN CICLOS INFINITOS
 // =====================================================
 
 export function useTraining() {
   const { user } = useAuth()
-  const [activeSession, setActiveSession] = useState<ActiveWorkoutSession | null>(null)
-  const [sets, setSets] = useState<ExerciseSet[]>([])
+  const router = useRouter()
+  const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [initialized, setInitialized] = useState(false)
 
-  // Cargar sesión activa al montar
+  // Hook de timeout para prevenir loading infinito
+  const {
+    isLoading: timeoutLoading,
+    hasTimedOut,
+    error: timeoutError,
+    startLoading,
+    stopLoading,
+    retry: retryTimeout,
+  } = useLoadingTimeout({
+    timeout: 10000, // 10 segundos para training
+    timeoutMessage: 'La carga del entrenamiento está tardando más de lo esperado',
+  })
+
+  // Refs para evitar re-renders
+  const loadingRef = useRef(false)
+  const userIdRef = useRef<string | null>(null)
+
+  // Cargar sesión activa SOLO una vez por usuario
   useEffect(() => {
-    if (!user) {
-      setActiveSession(null)
-      setSets([])
-      setLoading(false)
-      return
-    }
+    let mounted = true
 
     const loadActiveSession = async () => {
+      if (!user) {
+        setLoading(false)
+        setInitialized(true)
+        return
+      }
+
       try {
         setLoading(true)
-        const session = await getActiveWorkoutSession(user.id)
-        
-        if (session) {
-          // Convertir a ActiveWorkoutSession con valores por defecto
-          const activeSession: ActiveWorkoutSession = {
-            ...session,
-            current_set_number: 1,
-            is_resting: false,
-            rest_timer_seconds: 0,
-            rest_timer_preset: 90
-          }
-          setActiveSession(activeSession)
-          
-          // Cargar sets existentes
-          const existingSets = await getWorkoutSets(session.id)
-          setSets(existingSets)
-        }
-        
         setError(null)
+
+        const session = await getActiveWorkoutSession(user.id)
+
+        if (mounted) {
+          setActiveSession(session)
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error loading session')
+        const errorMessage = err instanceof Error ? err.message : 'Error loading active session'
+        console.error('Error loading active session:', err)
+
+        if (mounted) {
+          setError(errorMessage)
+        }
       } finally {
-        setLoading(false)
+        if (mounted) {
+          setLoading(false)
+          setInitialized(true)
+        }
       }
     }
 
     loadActiveSession()
-  }, [user])
 
-  // Crear nueva sesión
-  const startWorkout = useCallback(async (data: WorkoutFormData = {}) => {
-    if (!user) throw new Error('User not authenticated')
+    return () => {
+      mounted = false
+    }
+  }, [user?.id]) // SOLO depender del ID del usuario
 
-    try {
-      setLoading(true)
-      const session = await createWorkoutSession(user.id, data)
-      
-      const activeSession: ActiveWorkoutSession = {
-        ...session,
-        current_set_number: 1,
-        is_resting: false,
-        rest_timer_seconds: 0,
-        rest_timer_preset: 90
+  // Crear nueva sesión CON RUTINA REQUERIDA
+  const startWorkout = useCallback(
+    async (routineId: string, data: any = {}) => {
+      if (!user) throw new Error('User not authenticated')
+      if (!routineId) throw new Error('Routine is required to start workout')
+
+      try {
+        setLoading(true)
+        setError(null)
+
+        const session = await createWorkoutSession(user.id, {
+          ...data,
+          routine_id: routineId,
+        })
+
+        setActiveSession(session)
+        return session
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error starting workout'
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      } finally {
+        setLoading(false)
       }
-      
-      setActiveSession(activeSession)
-      setSets([])
-      setError(null)
-      
-      return activeSession
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error starting workout')
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [user])
+    },
+    [user]
+  )
 
-  // Completar sesión
-  const completeWorkout = useCallback(async (totalDurationSeconds: number) => {
-    if (!activeSession) throw new Error('No active session')
+  // Completar entrenamiento - IMPLEMENTACIÓN REAL
+  const completeWorkout = useCallback(
+    async (totalDurationSeconds?: number) => {
+      if (!activeSession || !user) return
 
-    try {
-      setLoading(true)
-      await completeWorkoutSession(activeSession.id, totalDurationSeconds)
-      setActiveSession(null)
-      setSets([])
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error completing workout')
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [activeSession])
+      try {
+        setLoading(true)
+        setError(null)
 
-  // Pausar/reanudar sesión
+        // Calcular duración si no se proporciona
+        const duration =
+          totalDurationSeconds ||
+          Math.floor((new Date().getTime() - new Date(activeSession.started_at).getTime()) / 1000)
+
+        // Llamada real a la API
+        await completeWorkoutSession(activeSession.id, duration)
+
+        // Limpiar estado de forma segura
+        setActiveSession(null)
+
+        // Forzar navegación después de limpiar estado
+        setTimeout(() => {
+          router.push('/training')
+        }, 100)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error completing workout'
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [activeSession, user, router]
+  )
   const pauseWorkout = useCallback(async () => {
     if (!activeSession) return
 
     try {
-      await pauseWorkoutSession(activeSession.id)
-      setActiveSession(prev => prev ? { ...prev, status: WORKOUT_STATUS.PAUSED } : null)
+      setActiveSession(prev => (prev ? { ...prev, status: WORKOUT_STATUS.PAUSED } : null))
+      setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error pausing workout')
     }
   }, [activeSession])
 
+  // Reanudar entrenamiento
   const resumeWorkout = useCallback(async () => {
     if (!activeSession) return
 
     try {
-      await resumeWorkoutSession(activeSession.id)
-      setActiveSession(prev => prev ? { ...prev, status: WORKOUT_STATUS.ACTIVE } : null)
+      setActiveSession(prev => (prev ? { ...prev, status: WORKOUT_STATUS.ACTIVE } : null))
+      setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error resuming workout')
     }
   }, [activeSession])
 
-  // Cancelar sesión
+  // Cancelar entrenamiento
   const cancelWorkout = useCallback(async () => {
     if (!activeSession) return
 
     try {
       setLoading(true)
-      await cancelWorkoutSession(activeSession.id)
-      setActiveSession(null)
-      setSets([])
       setError(null)
+
+      // Llamada real a la API para cancelar
+      await cancelWorkoutSession(activeSession.id)
+
+      // Limpiar estado de forma segura
+      setActiveSession(null)
+
+      // Forzar navegación después de limpiar estado
+      setTimeout(() => {
+        router.push('/training')
+      }, 100)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cancelling workout')
+      const errorMessage = err instanceof Error ? err.message : 'Error canceling workout'
+      setError(errorMessage)
+      console.error('Cancel workout error:', err)
     } finally {
       setLoading(false)
     }
-  }, [activeSession])
+  }, [activeSession, router])
 
-  // Agregar set
-  const addSet = useCallback(async (exerciseId: string, setData: SetFormData) => {
-    if (!activeSession) throw new Error('No active session')
+  const retry = () => {
+    setInitialized(false)
+    setError(null)
+    retryTimeout()
+  }
 
-    try {
-      const newSet = await addExerciseSet(activeSession.id, exerciseId, setData)
-      setSets(prev => [...prev, newSet])
-      
-      // Actualizar número de serie actual
-      setActiveSession(prev => prev ? {
-        ...prev,
-        current_exercise_id: exerciseId,
-        current_set_number: prev.current_set_number + 1
-      } : null)
-      
-      return newSet
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error adding set')
-      throw err
-    }
-  }, [activeSession])
-
-  // Actualizar set
-  const updateSet = useCallback(async (setId: string, updates: Partial<SetFormData>) => {
-    try {
-      const updatedSet = await updateExerciseSet(setId, updates)
-      setSets(prev => prev.map(set => set.id === setId ? updatedSet : set))
-      return updatedSet
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error updating set')
-      throw err
-    }
-  }, [])
-
-  // Eliminar set
-  const removeSet = useCallback(async (setId: string) => {
-    try {
-      await deleteExerciseSet(setId)
-      setSets(prev => prev.filter(set => set.id !== setId))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error removing set')
-      throw err
-    }
-  }, [])
+  // Utilidades
+  const clearError = () => setError(null)
 
   return {
     // Estado
     activeSession,
-    sets,
+    sets: [], // Por ahora vacío
     loading,
     error,
-    isActive: !!activeSession && activeSession.status === WORKOUT_STATUS.ACTIVE,
-    isPaused: !!activeSession && activeSession.status === WORKOUT_STATUS.PAUSED,
-    
+    initialized,
+
+    // Estados derivados
+    isActive: activeSession?.status === 'active',
+    isPaused: activeSession?.status === 'paused',
+
     // Acciones
     startWorkout,
-    completeWorkout,
     pauseWorkout,
     resumeWorkout,
+    completeWorkout,
     cancelWorkout,
-    addSet,
-    updateSet,
-    removeSet,
-    
+
     // Utilidades
-    clearError: () => setError(null)
-  }
-}
-
-// =====================================================
-// HOOK PARA TIMERS
-// =====================================================
-
-export function useWorkoutTimers(initialRestPreset: RestTimerPreset = 90) {
-  const [timers, setTimers] = useState<WorkoutTimers>({
-    session: { isRunning: false, seconds: 0 },
-    rest: { isRunning: false, seconds: 0 },
-    restPreset: initialRestPreset
-  })
-  
-  const sessionIntervalRef = useRef<NodeJS.Timeout>()
-  const restIntervalRef = useRef<NodeJS.Timeout>()
-
-  // Timer de sesión
-  const startSessionTimer = useCallback(() => {
-    setTimers(prev => ({
-      ...prev,
-      session: { 
-        ...prev.session, 
-        isRunning: true, 
-        startTime: Date.now() - (prev.session.seconds * 1000)
-      }
-    }))
-
-    sessionIntervalRef.current = setInterval(() => {
-      setTimers(prev => ({
-        ...prev,
-        session: {
-          ...prev.session,
-          seconds: prev.session.startTime 
-            ? Math.floor((Date.now() - prev.session.startTime) / 1000)
-            : prev.session.seconds + 1
-        }
-      }))
-    }, 1000)
-  }, [])
-
-  const pauseSessionTimer = useCallback(() => {
-    if (sessionIntervalRef.current) {
-      clearInterval(sessionIntervalRef.current)
-    }
-    setTimers(prev => ({
-      ...prev,
-      session: { ...prev.session, isRunning: false, pausedTime: Date.now() }
-    }))
-  }, [])
-
-  const stopSessionTimer = useCallback(() => {
-    if (sessionIntervalRef.current) {
-      clearInterval(sessionIntervalRef.current)
-    }
-    setTimers(prev => ({
-      ...prev,
-      session: { isRunning: false, seconds: 0 }
-    }))
-  }, [])
-
-  // Timer de descanso
-  const startRestTimer = useCallback((durationSeconds?: number) => {
-    const duration = durationSeconds || timers.restPreset
-    
-    setTimers(prev => ({
-      ...prev,
-      rest: { isRunning: true, seconds: duration }
-    }))
-
-    restIntervalRef.current = setInterval(() => {
-      setTimers(prev => {
-        const newSeconds = prev.rest.seconds - 1
-        if (newSeconds <= 0) {
-          if (restIntervalRef.current) {
-            clearInterval(restIntervalRef.current)
-          }
-          return {
-            ...prev,
-            rest: { isRunning: false, seconds: 0 }
-          }
-        }
-        return {
-          ...prev,
-          rest: { ...prev.rest, seconds: newSeconds }
-        }
-      })
-    }, 1000)
-  }, [timers.restPreset])
-
-  const stopRestTimer = useCallback(() => {
-    if (restIntervalRef.current) {
-      clearInterval(restIntervalRef.current)
-    }
-    setTimers(prev => ({
-      ...prev,
-      rest: { isRunning: false, seconds: 0 }
-    }))
-  }, [])
-
-  const setRestPreset = useCallback((preset: RestTimerPreset) => {
-    setTimers(prev => ({ ...prev, restPreset: preset }))
-  }, [])
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (sessionIntervalRef.current) clearInterval(sessionIntervalRef.current)
-      if (restIntervalRef.current) clearInterval(restIntervalRef.current)
-    }
-  }, [])
-
-  return {
-    timers,
-    startSessionTimer,
-    pauseSessionTimer,
-    stopSessionTimer,
-    startRestTimer,
-    stopRestTimer,
-    setRestPreset
-  }
-}
-
-// =====================================================
-// HOOK PARA DATOS HISTÓRICOS DE EJERCICIO
-// =====================================================
-
-export function useExerciseHistory(exerciseId: string) {
-  const { user } = useAuth()
-  const [lastPerformance, setLastPerformance] = useState<{
-    weight?: number
-    reps?: number
-    date?: string
-  } | null>(null)
-  const [bestPerformance, setBestPerformance] = useState<{
-    weight: number
-    reps: number
-    date: string
-  } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!user || !exerciseId) {
-      setLastPerformance(null)
-      setBestPerformance(null)
-      setLoading(false)
-      return
-    }
-
-    const loadHistory = async () => {
-      try {
-        setLoading(true)
-        const [last, best] = await Promise.all([
-          getLastExercisePerformance(user.id, exerciseId),
-          getBestExercisePerformance(user.id, exerciseId)
-        ])
-        
-        setLastPerformance(last)
-        setBestPerformance(best)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error loading history')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadHistory()
-  }, [user, exerciseId])
-
-  return {
-    lastPerformance,
-    bestPerformance,
-    loading,
-    error,
-    hasHistory: !!lastPerformance || !!bestPerformance
+    clearError: () => setError(null),
   }
 }

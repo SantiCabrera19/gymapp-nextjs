@@ -17,7 +17,7 @@ export function useRequireAuth(redirectTo: string = '/auth/login') {
   return {
     user,
     loading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   }
 }
 

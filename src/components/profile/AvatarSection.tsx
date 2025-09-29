@@ -24,10 +24,10 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
     if (!file || !user) return
 
     setIsUploading(true)
-    
+
     try {
       const result = await changeUserAvatar(file, user.id, avatar)
-      
+
       if (result.success && result.url) {
         onAvatarChange(result.url)
         showSuccess('Foto de perfil actualizada correctamente')
@@ -48,10 +48,10 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
     if (!user || !avatar) return
 
     setIsUploading(true)
-    
+
     try {
       const result = await removeUserAvatar(user.id, avatar)
-      
+
       if (result.success) {
         onAvatarChange(null)
         showSuccess('Foto de perfil eliminada')
@@ -78,7 +78,7 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
             fallback={name?.[0] || 'U'}
             className="ring-4 ring-background-tertiary"
           />
-          
+
           {/* Upload Overlay */}
           <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
             <Camera className="h-6 w-6 text-white" />
@@ -94,13 +94,9 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
 
         {/* Avatar Info */}
         <div className="flex-1">
-          <h3 className="text-xl font-semibold text-text-primary">
-            {name || 'Usuario'}
-          </h3>
-          <p className="text-text-secondary mb-4">
-            Personaliza tu foto de perfil
-          </p>
-          
+          <h3 className="text-xl font-semibold text-text-primary">{name || 'Usuario'}</h3>
+          <p className="text-text-secondary mb-4">Personaliza tu foto de perfil</p>
+
           <div className="flex gap-3">
             <div className="relative">
               <input
@@ -116,7 +112,7 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
                 size="sm"
                 disabled={isUploading}
                 className="cursor-pointer"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault()
                   const input = document.getElementById('avatar-upload') as HTMLInputElement
                   if (input) {
@@ -128,23 +124,16 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
                 {isUploading ? 'Subiendo...' : 'Cambiar foto'}
               </Button>
             </div>
-            
+
             {avatar && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRemoveAvatar}
-                disabled={isUploading}
-              >
+              <Button variant="ghost" size="sm" onClick={handleRemoveAvatar} disabled={isUploading}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 {isUploading ? 'Eliminando...' : 'Eliminar'}
               </Button>
             )}
           </div>
-          
-          <div className="text-xs text-text-tertiary mt-2">
-            JPG, PNG o GIF. Máximo 5MB.
-          </div>
+
+          <div className="text-xs text-text-tertiary mt-2">JPG, PNG o GIF. Máximo 5MB.</div>
         </div>
       </div>
     </Card>

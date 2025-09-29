@@ -54,6 +54,6 @@ export function usePagination<T>({ data, itemsPerPage = 12 }: UsePaginationProps
     resetPage,
     totalItems: data.length,
     startIndex: (currentPage - 1) * itemsPerPage + 1,
-    endIndex: Math.min(currentPage * itemsPerPage, data.length)
+    endIndex: Math.min(currentPage * itemsPerPage, data.length),
   }
 }

@@ -37,10 +37,10 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const error = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
-    
+
     if (error) {
-      setErrors({ 
-        general: errorDescription || 'El enlace de recuperación es inválido o ha expirado.' 
+      setErrors({
+        general: errorDescription || 'El enlace de recuperación es inválido o ha expirado.',
       })
     }
   }, [searchParams])
@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
 
     try {
       const res = await updatePassword(form.password)
-      
+
       if (!res.success) {
         setErrors({ general: res.error || 'No se pudo actualizar la contraseña.' })
         return
@@ -98,13 +98,14 @@ export default function ResetPasswordPage() {
     }
   }
 
-  const handleInputChange = (field: keyof ResetForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }))
-    // Clear field error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+  const handleInputChange =
+    (field: keyof ResetForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm(prev => ({ ...prev, [field]: e.target.value }))
+      // Clear field error when user starts typing
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: undefined }))
+      }
     }
-  }
 
   if (isSuccess) {
     return (
@@ -169,8 +170,12 @@ export default function ResetPasswordPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {passwordRequirements.map((req, index) => (
                     <div key={index} className="flex items-center gap-2">
-                      <Check className={`h-4 w-4 ${req.met ? 'text-status-success' : 'text-text-tertiary'}`} />
-                      <span className={`text-xs ${req.met ? 'text-status-success' : 'text-text-tertiary'}`}>
+                      <Check
+                        className={`h-4 w-4 ${req.met ? 'text-status-success' : 'text-text-tertiary'}`}
+                      />
+                      <span
+                        className={`text-xs ${req.met ? 'text-status-success' : 'text-text-tertiary'}`}
+                      >
                         {req.text}
                       </span>
                     </div>

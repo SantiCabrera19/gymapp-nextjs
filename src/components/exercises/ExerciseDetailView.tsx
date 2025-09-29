@@ -30,16 +30,20 @@ interface ExerciseDetailProps {
 
 export function ExerciseDetailView({ exercise }: ExerciseDetailProps) {
   const [showTechnique, setShowTechnique] = useState(false)
-  
+
   const difficulty = DIFFICULTY_LEVELS.find(d => d.id === exercise.difficulty_level)
   const primaryMuscle = MUSCLE_GROUPS.find(m => m.id === exercise.muscle_group_primary)
 
   const getDifficultyColor = (level?: string) => {
     switch (level) {
-      case 'beginner': return 'bg-green-500/20 text-green-400 border-green-500/30'
-      case 'intermediate': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-      case 'advanced': return 'bg-red-500/20 text-red-400 border-red-500/30'
-      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+      case 'beginner':
+        return 'bg-green-500/20 text-green-400 border-green-500/30'
+      case 'intermediate':
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+      case 'advanced':
+        return 'bg-red-500/20 text-red-400 border-red-500/30'
+      default:
+        return 'bg-slate-500/20 text-slate-400 border-slate-500/30'
     }
   }
 
@@ -49,25 +53,23 @@ export function ExerciseDetailView({ exercise }: ExerciseDetailProps) {
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight text-white">
-              {exercise.name}
-            </h1>
-            <p className="text-lg text-slate-400 max-w-2xl">
-              {exercise.description}
-            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-white">{exercise.name}</h1>
+            <p className="text-lg text-slate-400 max-w-2xl">{exercise.description}</p>
           </div>
-          
+
           {/* Badges */}
           <div className="flex gap-3">
             {difficulty && (
-              <div className={cn(
-                "px-3 py-2 rounded-full text-sm font-medium border backdrop-blur-sm",
-                getDifficultyColor(difficulty.id)
-              )}>
+              <div
+                className={cn(
+                  'px-3 py-2 rounded-full text-sm font-medium border backdrop-blur-sm',
+                  getDifficultyColor(difficulty.id)
+                )}
+              >
                 {difficulty.icon} {difficulty.name}
               </div>
             )}
-            
+
             <div className="px-3 py-2 rounded-full text-sm font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 capitalize">
               <Dumbbell size={16} className="inline mr-2" />
               {exercise.equipment}
@@ -97,16 +99,13 @@ export function ExerciseDetailView({ exercise }: ExerciseDetailProps) {
                   {showTechnique ? 'Ocultar' : 'Ver'} Técnica
                 </Button>
               </div>
-              
-              <ExerciseDemonstration 
-                exercise={exercise}
-                showTechnique={showTechnique}
-              />
+
+              <ExerciseDemonstration exercise={exercise} showTechnique={showTechnique} />
             </div>
           </Card>
 
           {/* Músculos trabajados */}
-          <ExerciseMuscles 
+          <ExerciseMuscles
             primaryMuscle={exercise.muscle_group_primary}
             // TODO: Add secondary muscles from database
             secondaryMuscles={[]}
@@ -141,7 +140,7 @@ export function ExerciseDetailView({ exercise }: ExerciseDetailProps) {
 
         {/* Sidebar derecho (1/3) */}
         <div className="space-y-6">
-          <ExerciseTechnique 
+          <ExerciseTechnique
             instructions={exercise.instructions}
             tips={exercise.tips}
             commonMistakes={exercise.common_mistakes}

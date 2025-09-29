@@ -35,7 +35,7 @@ export default function RegisterPage() {
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [showPassword, setShowPassword] = useState(false)
@@ -85,7 +85,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -126,19 +126,17 @@ export default function RegisterPage() {
     }
   }
 
-  const handleInputChange = (field: keyof RegisterForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }))
-    // Clear field error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+  const handleInputChange =
+    (field: keyof RegisterForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm(prev => ({ ...prev, [field]: e.target.value }))
+      // Clear field error when user starts typing
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: undefined }))
+      }
     }
-  }
 
   return (
-    <AuthLayout
-      title="Crear cuenta"
-      subtitle="Únete a GymApp y comienza tu transformación"
-    >
+    <AuthLayout title="Crear cuenta" subtitle="Únete a GymApp y comienza tu transformación">
       <Card className="border-border-primary/50">
         <CardContent className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -207,7 +205,9 @@ export default function RegisterPage() {
                       ) : (
                         <X className="h-4 w-4 text-text-tertiary" />
                       )}
-                      <span className={`text-xs ${req.met ? 'text-status-success' : 'text-text-tertiary'}`}>
+                      <span
+                        className={`text-xs ${req.met ? 'text-status-success' : 'text-text-tertiary'}`}
+                      >
                         {req.text}
                       </span>
                     </div>

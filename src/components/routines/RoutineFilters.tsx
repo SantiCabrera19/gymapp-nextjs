@@ -18,14 +18,14 @@ interface RoutineFiltersProps {
 const DIFFICULTY_OPTIONS = [
   { value: 'beginner', label: 'Principiante', color: 'text-green-400' },
   { value: 'intermediate', label: 'Intermedio', color: 'text-yellow-400' },
-  { value: 'advanced', label: 'Avanzado', color: 'text-red-400' }
+  { value: 'advanced', label: 'Avanzado', color: 'text-red-400' },
 ]
 
 const SORT_OPTIONS = [
   { value: 'created_at', label: 'Fecha de creación' },
   { value: 'name', label: 'Nombre' },
   { value: 'duration', label: 'Duración' },
-  { value: 'exercises', label: 'Número de ejercicios' }
+  { value: 'exercises', label: 'Número de ejercicios' },
 ]
 
 export function RoutineFilters({
@@ -34,14 +34,15 @@ export function RoutineFilters({
   onReset,
   availableTags,
   isOpen,
-  onToggle
+  onToggle,
 }: RoutineFiltersProps) {
   const [showDifficultyDropdown, setShowDifficultyDropdown] = useState(false)
   const [showTagsDropdown, setShowTagsDropdown] = useState(false)
   const [showSortDropdown, setShowSortDropdown] = useState(false)
 
-  const hasActiveFilters = filters.search || 
-    filters.difficulty.length > 0 || 
+  const hasActiveFilters =
+    filters.search ||
+    filters.difficulty.length > 0 ||
     filters.tags.length > 0 ||
     filters.sortBy !== 'created_at' ||
     filters.sortOrder !== 'desc'
@@ -70,11 +71,14 @@ export function RoutineFilters({
       <div className="flex gap-3">
         {/* Search */}
         <div className="relative flex-1">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"
+          />
           <Input
             placeholder="Buscar rutinas..."
             value={filters.search}
-            onChange={(e) => onUpdateFilter('search', e.target.value)}
+            onChange={e => onUpdateFilter('search', e.target.value)}
             className="pl-10"
           />
         </div>
@@ -84,8 +88,8 @@ export function RoutineFilters({
           variant="outline"
           onClick={onToggle}
           className={cn(
-            "relative",
-            hasActiveFilters && "border-accent-primary text-accent-primary"
+            'relative',
+            hasActiveFilters && 'border-accent-primary text-accent-primary'
           )}
         >
           <Filter size={16} className="mr-2" />
@@ -113,19 +117,16 @@ export function RoutineFilters({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background-tertiary rounded-lg border border-border-primary">
           {/* Difficulty Filter */}
           <div className="relative">
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Dificultad
-            </label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Dificultad</label>
             <Button
               variant="outline"
               onClick={() => setShowDifficultyDropdown(!showDifficultyDropdown)}
               className="w-full justify-between"
             >
               <span>
-                {filters.difficulty.length === 0 
-                  ? 'Todas' 
-                  : `${filters.difficulty.length} seleccionada${filters.difficulty.length > 1 ? 's' : ''}`
-                }
+                {filters.difficulty.length === 0
+                  ? 'Todas'
+                  : `${filters.difficulty.length} seleccionada${filters.difficulty.length > 1 ? 's' : ''}`}
               </span>
               <ChevronDown size={16} />
             </Button>
@@ -133,7 +134,7 @@ export function RoutineFilters({
             {showDifficultyDropdown && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-background-tertiary border border-border-primary rounded-lg shadow-lg z-10">
                 <div className="p-2 space-y-1">
-                  {DIFFICULTY_OPTIONS.map((option) => (
+                  {DIFFICULTY_OPTIONS.map(option => (
                     <label
                       key={option.value}
                       className="flex items-center gap-2 p-2 hover:bg-background-card rounded cursor-pointer"
@@ -144,9 +145,7 @@ export function RoutineFilters({
                         onChange={() => toggleDifficulty(option.value)}
                         className="rounded border-border-primary"
                       />
-                      <span className={cn("text-sm", option.color)}>
-                        {option.label}
-                      </span>
+                      <span className={cn('text-sm', option.color)}>{option.label}</span>
                     </label>
                   ))}
                 </div>
@@ -156,9 +155,7 @@ export function RoutineFilters({
 
           {/* Tags Filter */}
           <div className="relative">
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Etiquetas
-            </label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Etiquetas</label>
             <Button
               variant="outline"
               onClick={() => setShowTagsDropdown(!showTagsDropdown)}
@@ -166,10 +163,9 @@ export function RoutineFilters({
               disabled={availableTags.length === 0}
             >
               <span>
-                {filters.tags.length === 0 
-                  ? 'Todas' 
-                  : `${filters.tags.length} seleccionada${filters.tags.length > 1 ? 's' : ''}`
-                }
+                {filters.tags.length === 0
+                  ? 'Todas'
+                  : `${filters.tags.length} seleccionada${filters.tags.length > 1 ? 's' : ''}`}
               </span>
               <ChevronDown size={16} />
             </Button>
@@ -177,7 +173,7 @@ export function RoutineFilters({
             {showTagsDropdown && availableTags.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-background-tertiary border border-border-primary rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                 <div className="p-2 space-y-1">
-                  {availableTags.map((tag) => (
+                  {availableTags.map(tag => (
                     <label
                       key={tag}
                       className="flex items-center gap-2 p-2 hover:bg-background-card rounded cursor-pointer"
@@ -188,9 +184,7 @@ export function RoutineFilters({
                         onChange={() => toggleTag(tag)}
                         className="rounded border-border-primary"
                       />
-                      <span className="text-sm text-text-primary">
-                        {tag}
-                      </span>
+                      <span className="text-sm text-text-primary">{tag}</span>
                     </label>
                   ))}
                 </div>
@@ -200,26 +194,18 @@ export function RoutineFilters({
 
           {/* Sort Options */}
           <div className="relative">
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Ordenar por
-            </label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Ordenar por</label>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
                 className="flex-1 justify-between"
               >
-                <span>
-                  {SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label}
-                </span>
+                <span>{SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label}</span>
                 <ChevronDown size={16} />
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={toggleSortOrder}
-                className="px-3"
-              >
+              <Button variant="outline" onClick={toggleSortOrder} className="px-3">
                 {filters.sortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
               </Button>
             </div>
@@ -227,7 +213,7 @@ export function RoutineFilters({
             {showSortDropdown && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-background-tertiary border border-border-primary rounded-lg shadow-lg z-10">
                 <div className="p-2 space-y-1">
-                  {SORT_OPTIONS.map((option) => (
+                  {SORT_OPTIONS.map(option => (
                     <button
                       key={option.value}
                       onClick={() => {
@@ -235,10 +221,10 @@ export function RoutineFilters({
                         setShowSortDropdown(false)
                       }}
                       className={cn(
-                        "w-full text-left p-2 hover:bg-background-card rounded text-sm transition-colors",
-                        filters.sortBy === option.value 
-                          ? "text-accent-primary bg-accent-primary/10" 
-                          : "text-text-primary"
+                        'w-full text-left p-2 hover:bg-background-card rounded text-sm transition-colors',
+                        filters.sortBy === option.value
+                          ? 'text-accent-primary bg-accent-primary/10'
+                          : 'text-text-primary'
                       )}
                     >
                       {option.label}
@@ -254,7 +240,7 @@ export function RoutineFilters({
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
-          {filters.difficulty.map((difficulty) => {
+          {filters.difficulty.map(difficulty => {
             const option = DIFFICULTY_OPTIONS.find(opt => opt.value === difficulty)
             return (
               <span
@@ -272,16 +258,13 @@ export function RoutineFilters({
             )
           })}
 
-          {filters.tags.map((tag) => (
+          {filters.tags.map(tag => (
             <span
               key={tag}
               className="inline-flex items-center gap-1 px-2 py-1 bg-background-tertiary border border-border-primary rounded-md text-sm"
             >
               <span>{tag}</span>
-              <button
-                onClick={() => toggleTag(tag)}
-                className="hover:text-text-primary"
-              >
+              <button onClick={() => toggleTag(tag)} className="hover:text-text-primary">
                 <X size={12} />
               </button>
             </span>

@@ -42,9 +42,7 @@ export function AuthLayout({ children, title, subtitle, showBackButton = true }:
           </div>
 
           {/* Form content */}
-          <div className="space-y-6">
-            {children}
-          </div>
+          <div className="space-y-6">{children}</div>
         </div>
       </main>
 

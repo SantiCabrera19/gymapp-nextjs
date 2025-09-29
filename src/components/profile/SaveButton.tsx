@@ -13,13 +13,13 @@ interface SaveButtonProps {
   type?: 'save' | 'discard'
 }
 
-export function SaveButton({ 
-  children, 
-  onClick, 
-  disabled, 
-  isLoading, 
+export function SaveButton({
+  children,
+  onClick,
+  disabled,
+  isLoading,
   variant = 'default',
-  type = 'save'
+  type = 'save',
 }: SaveButtonProps) {
   const getIcon = () => {
     if (isLoading) return <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -38,11 +38,11 @@ export function SaveButton({
       onClick={onClick}
       disabled={disabled || isLoading}
       className={cn(
-        "min-w-[120px] transition-all duration-200",
-        variant === 'default' && "shadow-lg hover:shadow-xl hover:scale-105",
-        variant === 'ghost' && "hover:bg-background-tertiary",
-        disabled && !isLoading && "opacity-50 cursor-not-allowed",
-        isLoading && "cursor-wait"
+        'min-w-[120px] transition-all duration-200',
+        variant === 'default' && 'shadow-lg hover:shadow-xl hover:scale-105',
+        variant === 'ghost' && 'hover:bg-background-tertiary',
+        disabled && !isLoading && 'opacity-50 cursor-not-allowed',
+        isLoading && 'cursor-wait'
       )}
     >
       {isLoading ? (

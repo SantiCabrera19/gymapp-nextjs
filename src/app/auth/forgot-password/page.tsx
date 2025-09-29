@@ -7,8 +7,13 @@ import { Button, Input, Card, CardContent } from '@/components/ui'
 import { resetPasswordEmail } from '@/lib/api/auth'
 import { Mail } from 'lucide-react'
 
-interface ForgotForm { email: string }
-interface FormErrors { email?: string; general?: string }
+interface ForgotForm {
+  email: string
+}
+interface FormErrors {
+  email?: string
+  general?: string
+}
 
 export default function ForgotPasswordPage() {
   const [form, setForm] = useState<ForgotForm>({ email: '' })
@@ -56,7 +61,8 @@ export default function ForgotPasswordPage() {
                 <span className="text-status-success text-2xl">✓</span>
               </div>
               <p className="text-text-secondary">
-                Si la dirección está registrada, recibirás un correo con instrucciones para restablecer tu contraseña.
+                Si la dirección está registrada, recibirás un correo con instrucciones para
+                restablecer tu contraseña.
               </p>
               <Link href="/auth/login">
                 <Button variant="outline">Volver al inicio de sesión</Button>
@@ -70,7 +76,7 @@ export default function ForgotPasswordPage() {
                   type="email"
                   placeholder="tu@email.com"
                   value={form.email}
-                  onChange={(e) => setForm({ email: e.target.value })}
+                  onChange={e => setForm({ email: e.target.value })}
                   error={errors.email}
                   disabled={isLoading}
                   className="pl-12"
@@ -84,13 +90,21 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
 
-              <Button type="submit" variant="outline" size="lg" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                variant="outline"
+                size="lg"
+                className="w-full"
+                disabled={isLoading}
+              >
                 {isLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
               </Button>
 
               <div className="text-center">
                 <Link href="/auth/login">
-                  <Button variant="outline" size="sm" className="mt-2">Volver al inicio de sesión</Button>
+                  <Button variant="outline" size="sm" className="mt-2">
+                    Volver al inicio de sesión
+                  </Button>
                 </Link>
               </div>
             </form>

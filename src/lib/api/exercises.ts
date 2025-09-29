@@ -11,14 +11,16 @@ export async function getExercises(userId?: string): Promise<Exercise[]> {
   // Sin usuario, datos básicos
   const { data, error } = await supabase
     .from('exercises')
-    .select(`
+    .select(
+      `
       *,
       exercise_muscles (
         involvement_level,
         intensity,
         muscle:muscles (*)
       )
-    `)
+    `
+    )
     .eq('is_approved', true)
     .order('name')
 
@@ -31,21 +33,25 @@ export async function getRecommendedExercises(experienceLevel: string): Promise<
   const difficultyMap = {
     beginner: ['beginner'],
     intermediate: ['beginner', 'intermediate'],
-    advanced: ['beginner', 'intermediate', 'advanced']
+    advanced: ['beginner', 'intermediate', 'advanced'],
   }
 
-  const allowedDifficulties = difficultyMap[experienceLevel as keyof typeof difficultyMap] || ['beginner']
+  const allowedDifficulties = difficultyMap[experienceLevel as keyof typeof difficultyMap] || [
+    'beginner',
+  ]
 
   const { data, error } = await supabase
     .from('exercises')
-    .select(`
+    .select(
+      `
       *,
       exercise_muscles (
         involvement_level,
         intensity,
         muscle:muscles (*)
       )
-    `)
+    `
+    )
     .eq('is_approved', true)
     .in('difficulty_level', allowedDifficulties)
     .order('name')
@@ -58,14 +64,16 @@ export async function getRecommendedExercises(experienceLevel: string): Promise<
 export async function getExerciseById(id: string, userId?: string): Promise<Exercise | null> {
   const { data, error } = await supabase
     .from('exercises')
-    .select(`
+    .select(
+      `
       *,
       exercise_muscles (
         involvement_level,
         intensity,
         muscle:muscles (*)
       )
-    `)
+    `
+    )
     .eq('id', id)
     .single()
 
@@ -73,17 +81,19 @@ export async function getExerciseById(id: string, userId?: string): Promise<Exer
 
   // Si hay usuario, agregar datos personales
   if (userId && data) {
-    const { getUserFavoriteExercises, getExerciseStats, statsToUserStats } = await import('./user-exercises')
-    
+    const { getUserFavoriteExercises, getExerciseStats, statsToUserStats } = await import(
+      './user-exercises'
+    )
+
     const [favorites, stats] = await Promise.all([
       getUserFavoriteExercises(userId),
-      getExerciseStats(userId, id)
+      getExerciseStats(userId, id),
     ])
 
     return {
       ...data,
       is_favorite: favorites.includes(id),
-      user_stats: stats ? statsToUserStats(stats) : undefined
+      user_stats: stats ? statsToUserStats(stats) : undefined,
     }
   }
 
@@ -93,14 +103,16 @@ export async function getExerciseById(id: string, userId?: string): Promise<Exer
 export async function searchExercises(query: string): Promise<Exercise[]> {
   const { data, error } = await supabase
     .from('exercises')
-    .select(`
+    .select(
+      `
       *,
       exercise_muscles (
         involvement_level,
         intensity,
         muscle:muscles (*)
       )
-    `)
+    `
+    )
     .eq('is_approved', true)
     .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
     .limit(10)

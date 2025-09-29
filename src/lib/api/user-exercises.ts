@@ -13,7 +13,7 @@ import {
   filterNulls,
   validateRecordType,
   statsToUserStats,
-  RECORD_TYPES
+  RECORD_TYPES,
 } from '@/types/user-exercises'
 
 // Re-export para uso en exercises.ts
@@ -29,16 +29,12 @@ export async function getUserFavoriteExercises(userId: string): Promise<string[]
     .select('exercise_id')
     .eq('user_id', userId)
 
-  if (error) throw error
-  
+
   // Filtrar nulls y retornar solo exercise_ids válidos
   return filterNulls(data?.map(item => item.exercise_id) || [])
 }
 
-export async function toggleExerciseFavorite(
-  userId: string, 
-  exerciseId: string
-): Promise<{ isFavorite: boolean }> {
+export async function toggleExerciseFavorite(userId: string, exerciseId: string, isFavorite: boolean): Promise<{ isFavorite: boolean }> {
   // Verificar si ya existe
   const { data: existing } = await supabase
     .from('user_exercise_favorites')
@@ -73,7 +69,7 @@ export async function toggleExerciseFavorite(
 // =====================================================
 
 export async function getExerciseRecords(
-  userId: string, 
+  userId: string,
   exerciseId: string
 ): Promise<ExerciseRecord[]> {
   const { data, error } = await supabase
@@ -84,34 +80,36 @@ export async function getExerciseRecords(
     .order('achieved_at', { ascending: false })
 
   if (error) throw error
-  
+
   // Transformar y validar datos de DB
   return (data || []).map(transformRecordFromDB)
 }
 
 export async function getUserTopRecords(
-  userId: string, 
+  userId: string,
   limit: number = 10
 ): Promise<ExerciseRecordWithExercise[]> {
   const { data, error } = await supabase
     .from('user_exercise_records')
-    .select(`
+    .select(
+      `
       *,
       exercise:exercises(name)
-    `)
+    `
+    )
     .eq('user_id', userId)
     .eq('record_type', RECORD_TYPES.MAX_WEIGHT)
     .order('value', { ascending: false })
     .limit(limit)
 
   if (error) throw error
-  
+
   // Transformar y validar datos
   return (data || []).map(record => {
     const transformedRecord = transformRecordFromDB(record)
     return {
       ...transformedRecord,
-      exercise_name: record.exercise?.name || 'Ejercicio desconocido'
+      exercise_name: record.exercise?.name || 'Ejercicio desconocido',
     }
   })
 }
@@ -121,7 +119,7 @@ export async function getUserTopRecords(
 // =====================================================
 
 export async function getExerciseStats(
-  userId: string, 
+  userId: string,
   exerciseId: string
 ): Promise<ExerciseStats | null> {
   const { data, error } = await supabase
@@ -132,7 +130,7 @@ export async function getExerciseStats(
     .single()
 
   if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
-  
+
   // Transformar datos si existen
   return data ? transformStatsFromDB(data) : null
 }
@@ -159,15 +157,15 @@ export async function getUserOverallStats(userId: string): Promise<UserOverallSt
     }
     return acc
   }, {})
-  
-  const favoriteMuscleGroup = Object.entries(muscleGroupCounts)
-    .sort(([,a], [,b]) => b - a)[0]?.[0] || 'chest'
+
+  const favoriteMuscleGroup =
+    Object.entries(muscleGroupCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || 'chest'
 
   return {
     total_workouts: totalWorkouts,
     total_exercises: totalExercises,
     total_volume_kg: totalVolume,
-    favorite_muscle_group: favoriteMuscleGroup
+    favorite_muscle_group: favoriteMuscleGroup,
   }
 }
 
@@ -185,12 +183,14 @@ export async function getExerciseProgress(
 
   const { data, error } = await supabase
     .from('exercise_sets')
-    .select(`
+    .select(
+      `
       completed_at,
       weight_kg,
       reps_completed,
       workout_sessions!inner(user_id)
-    `)
+    `
+    )
     .eq('exercise_id', exerciseId)
     .eq('workout_sessions.user_id', userId)
     .gte('completed_at', startDate.toISOString())
@@ -199,14 +199,14 @@ export async function getExerciseProgress(
   if (error) throw error
 
   // Agrupar por mes y calcular promedios
-  const monthlyData: Record<string, { weights: number[], reps: number[], volumes: number[] }> = {}
+  const monthlyData: Record<string, { weights: number[]; reps: number[]; volumes: number[] }> = {}
 
   data?.forEach(set => {
     if (!set.completed_at) return
-    
+
     const date = new Date(set.completed_at)
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    
+
     if (!monthlyData[monthKey]) {
       monthlyData[monthKey] = { weights: [], reps: [], volumes: [] }
     }
@@ -219,12 +219,14 @@ export async function getExerciseProgress(
   })
 
   // Convertir a formato de gráfico
-  return Object.entries(monthlyData).map(([month, data]) => ({
-    date: month,
-    weight: data.weights.length > 0 ? Math.max(...data.weights) : undefined,
-    volume: data.volumes.length > 0 ? data.volumes.reduce((a, b) => a + b, 0) : undefined,
-    reps: data.reps.length > 0 ? Math.max(...data.reps) : undefined
-  })).sort((a, b) => a.date.localeCompare(b.date))
+  return Object.entries(monthlyData)
+    .map(([month, data]) => ({
+      date: month,
+      weight: data.weights.length > 0 ? Math.max(...data.weights) : undefined,
+      volume: data.volumes.length > 0 ? data.volumes.reduce((a, b) => a + b, 0) : undefined,
+      reps: data.reps.length > 0 ? Math.max(...data.reps) : undefined,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date))
 }
 
 // =====================================================
@@ -234,7 +236,8 @@ export async function getExerciseProgress(
 export async function getExercisesWithUserData(userId: string): Promise<any[]> {
   const { data, error } = await supabase
     .from('exercises')
-    .select(`
+    .select(
+      `
       *,
       exercise_muscles (
         involvement_level,
@@ -248,7 +251,8 @@ export async function getExercisesWithUserData(userId: string): Promise<any[]> {
         total_sessions,
         last_performed_at
       )
-    `)
+    `
+    )
     .eq('is_approved', true)
     .eq('user_exercise_favorites.user_id', userId)
     .eq('user_exercise_stats.user_id', userId)
@@ -257,9 +261,11 @@ export async function getExercisesWithUserData(userId: string): Promise<any[]> {
   if (error) throw error
 
   // Transformar datos para incluir is_favorite
-  return data?.map(exercise => ({
-    ...exercise,
-    is_favorite: exercise.user_exercise_favorites?.length > 0,
-    user_stats: exercise.user_exercise_stats?.[0] || null
-  })) || []
+  return (
+    data?.map(exercise => ({
+      ...exercise,
+      is_favorite: exercise.user_exercise_favorites?.length > 0,
+      user_stats: exercise.user_exercise_stats?.[0] || null,
+    })) || []
+  )
 }

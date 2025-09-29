@@ -7,20 +7,20 @@ export function ExerciseCardSkeleton() {
     <Card className="overflow-hidden">
       {/* Image skeleton */}
       <Skeleton className="aspect-video w-full" />
-      
+
       {/* Content skeleton */}
       <div className="p-4 space-y-3">
         <Skeleton className="h-6 w-3/4" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
-        
+
         {/* Info row */}
         <div className="flex justify-between">
           <Skeleton className="h-3 w-16" />
           <Skeleton className="h-3 w-20" />
           <Skeleton className="h-3 w-14" />
         </div>
-        
+
         {/* Buttons */}
         <div className="flex gap-2 pt-2">
           <Skeleton className="h-8 flex-1" />
@@ -51,13 +51,13 @@ export function ExercisesPageSkeleton() {
         <Skeleton className="h-4 w-4" />
         <Skeleton className="h-4 w-20" />
       </div>
-      
+
       {/* Header skeleton */}
       <div className="space-y-2">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-5 w-96" />
       </div>
-      
+
       {/* Toolbar skeleton */}
       <div className="flex flex-col sm:flex-row gap-4">
         <Skeleton className="flex-1 h-10" />
@@ -66,13 +66,13 @@ export function ExercisesPageSkeleton() {
           <Skeleton className="w-20 h-10" />
         </div>
       </div>
-      
+
       {/* Stats skeleton */}
       <Skeleton className="h-5 w-48" />
-      
+
       {/* Grid skeleton */}
       <ExercisesGridSkeleton />
-      
+
       {/* Pagination skeleton */}
       <div className="flex justify-center">
         <div className="flex items-center space-x-2">

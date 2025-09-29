@@ -10,24 +10,19 @@ interface WorkoutTimerProps {
   className?: string
 }
 
-export function WorkoutTimer({ 
-  timeElapsed, 
-  isActive, 
-  onToggle,
-  className 
-}: WorkoutTimerProps) {
+export function WorkoutTimer({ timeElapsed, isActive, onToggle, className }: WorkoutTimerProps) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <div className="flex items-center gap-2 text-sm">
-        <Timer className={cn(
-          "h-4 w-4",
-          isActive ? "text-accent-primary animate-pulse" : "text-text-tertiary"
-        )} />
-        <span className="font-mono text-text-primary">
-          {timeElapsed}
-        </span>
+        <Timer
+          className={cn(
+            'h-4 w-4',
+            isActive ? 'text-accent-primary animate-pulse' : 'text-text-tertiary'
+          )}
+        />
+        <span className="font-mono text-text-primary">{timeElapsed}</span>
       </div>
-      
+
       {onToggle && (
         <button
           onClick={onToggle}

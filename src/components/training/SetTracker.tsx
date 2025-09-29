@@ -22,15 +22,13 @@ interface SetTrackerProps {
   className?: string
 }
 
-export function SetTracker({ 
-  exerciseName, 
-  onSetComplete, 
+export function SetTracker({
+  exerciseName,
+  onSetComplete,
   onAllSetsComplete,
-  className 
+  className,
 }: SetTrackerProps) {
-  const [sets, setSets] = useState<Set[]>([
-    { id: '1', setNumber: 1, reps: 0, completed: false }
-  ])
+  const [sets, setSets] = useState<Set[]>([{ id: '1', setNumber: 1, reps: 0, completed: false }])
   const [currentSet, setCurrentSet] = useState(0)
   const [restTimer, setRestTimer] = useState(0)
   const [isResting, setIsResting] = useState(false)
@@ -41,42 +39,46 @@ export function SetTracker({
       setNumber: sets.length + 1,
       reps: sets[sets.length - 1]?.reps || 0,
       weight: sets[sets.length - 1]?.weight,
-      completed: false
+      completed: false,
     }
     setSets(prev => [...prev, newSet])
   }, [sets])
 
-  const removeSet = useCallback((setId: string) => {
-    if (sets.length <= 1) return
-    setSets(prev => prev.filter(set => set.id !== setId))
-  }, [sets])
+  const removeSet = useCallback(
+    (setId: string) => {
+      if (sets.length <= 1) return
+      setSets(prev => prev.filter(set => set.id !== setId))
+    },
+    [sets]
+  )
 
   const updateSet = useCallback((setId: string, updates: Partial<Set>) => {
-    setSets(prev => prev.map(set => 
-      set.id === setId ? { ...set, ...updates } : set
-    ))
+    setSets(prev => prev.map(set => (set.id === setId ? { ...set, ...updates } : set)))
   }, [])
 
-  const completeSet = useCallback((setId: string) => {
-    const set = sets.find(s => s.id === setId)
-    if (!set) return
+  const completeSet = useCallback(
+    (setId: string) => {
+      const set = sets.find(s => s.id === setId)
+      if (!set) return
 
-    const completedSet = { ...set, completed: true }
-    updateSet(setId, { completed: true })
-    onSetComplete?.(completedSet)
+      const completedSet = { ...set, completed: true }
+      updateSet(setId, { completed: true })
+      onSetComplete?.(completedSet)
 
-    // Avanzar al siguiente set
-    const nextSetIndex = sets.findIndex(s => s.id === setId) + 1
-    if (nextSetIndex < sets.length) {
-      setCurrentSet(nextSetIndex)
-      // Iniciar descanso automático
-      setIsResting(true)
-      setRestTimer(90) // 90 segundos por defecto
-    } else {
-      // Todos los sets completados
-      onAllSetsComplete?.(sets.map(s => s.id === setId ? completedSet : s))
-    }
-  }, [sets, onSetComplete, onAllSetsComplete, updateSet])
+      // Avanzar al siguiente set
+      const nextSetIndex = sets.findIndex(s => s.id === setId) + 1
+      if (nextSetIndex < sets.length) {
+        setCurrentSet(nextSetIndex)
+        // Iniciar descanso automático
+        setIsResting(true)
+        setRestTimer(90) // 90 segundos por defecto
+      } else {
+        // Todos los sets completados
+        onAllSetsComplete?.(sets.map(s => (s.id === setId ? completedSet : s)))
+      }
+    },
+    [sets, onSetComplete, onAllSetsComplete, updateSet]
+  )
 
   const skipRest = useCallback(() => {
     setIsResting(false)
@@ -90,7 +92,7 @@ export function SetTracker({
   }
 
   return (
-    <Card className={cn("p-6 space-y-6", className)}>
+    <Card className={cn('p-6 space-y-6', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -145,30 +147,32 @@ export function SetTracker({
           <Card
             key={set.id}
             className={cn(
-              "p-4 transition-all",
-              set.completed && "bg-green-500/10 border-green-500/20",
-              index === currentSet && !set.completed && "ring-2 ring-accent-primary border-accent-primary",
-              index > currentSet && "opacity-60"
+              'p-4 transition-all',
+              set.completed && 'bg-green-500/10 border-green-500/20',
+              index === currentSet &&
+                !set.completed &&
+                'ring-2 ring-accent-primary border-accent-primary',
+              index > currentSet && 'opacity-60'
             )}
           >
             <div className="flex items-center gap-4">
               {/* Set Number */}
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
-                set.completed 
-                  ? "bg-green-500 text-white" 
-                  : index === currentSet
-                    ? "bg-accent-primary text-white"
-                    : "bg-background-tertiary text-text-secondary"
-              )}>
+              <div
+                className={cn(
+                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
+                  set.completed
+                    ? 'bg-green-500 text-white'
+                    : index === currentSet
+                      ? 'bg-accent-primary text-white'
+                      : 'bg-background-tertiary text-text-secondary'
+                )}
+              >
                 {set.completed ? <Check size={16} /> : set.setNumber}
               </div>
 
               {/* Reps Input */}
               <div className="flex-1">
-                <label className="text-xs text-text-secondary block mb-1">
-                  Repeticiones
-                </label>
+                <label className="text-xs text-text-secondary block mb-1">Repeticiones</label>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
@@ -182,7 +186,7 @@ export function SetTracker({
                   <Input
                     type="number"
                     value={set.reps}
-                    onChange={(e) => updateSet(set.id, { reps: parseInt(e.target.value) || 0 })}
+                    onChange={e => updateSet(set.id, { reps: parseInt(e.target.value) || 0 })}
                     disabled={set.completed}
                     className="w-16 text-center bg-background-tertiary border-border-primary"
                     min="0"
@@ -201,13 +205,13 @@ export function SetTracker({
 
               {/* Weight Input (Optional) */}
               <div className="flex-1">
-                <label className="text-xs text-text-secondary block mb-1">
-                  Peso (kg)
-                </label>
+                <label className="text-xs text-text-secondary block mb-1">Peso (kg)</label>
                 <Input
                   type="number"
                   value={set.weight || ''}
-                  onChange={(e) => updateSet(set.id, { weight: parseFloat(e.target.value) || undefined })}
+                  onChange={e =>
+                    updateSet(set.id, { weight: parseFloat(e.target.value) || undefined })
+                  }
                   disabled={set.completed}
                   placeholder="0"
                   className="bg-background-tertiary border-border-primary"
@@ -241,9 +245,7 @@ export function SetTracker({
                     )}
                   </>
                 ) : (
-                  <div className="text-green-400 text-sm font-medium">
-                    ✓ Completado
-                  </div>
+                  <div className="text-green-400 text-sm font-medium">✓ Completado</div>
                 )}
               </div>
             </div>
@@ -254,7 +256,7 @@ export function SetTracker({
                 <Input
                   placeholder="Notas de la serie (opcional)..."
                   value={set.notes || ''}
-                  onChange={(e) => updateSet(set.id, { notes: e.target.value })}
+                  onChange={e => updateSet(set.id, { notes: e.target.value })}
                   className="bg-background-tertiary border-border-primary text-sm"
                 />
               </div>
@@ -268,17 +270,17 @@ export function SetTracker({
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1 text-text-secondary">
             <Target size={16} />
-            <span>Total: {sets.filter(s => s.completed).length}/{sets.length} series</span>
+            <span>
+              Total: {sets.filter(s => s.completed).length}/{sets.length} series
+            </span>
           </div>
           <div className="text-text-secondary">
             Reps: {sets.reduce((acc, s) => acc + (s.completed ? s.reps : 0), 0)}
           </div>
         </div>
-        
+
         {sets.every(s => s.completed) && (
-          <div className="text-green-400 text-sm font-medium">
-            🎉 ¡Ejercicio completado!
-          </div>
+          <div className="text-green-400 text-sm font-medium">🎉 ¡Ejercicio completado!</div>
         )}
       </div>
     </Card>

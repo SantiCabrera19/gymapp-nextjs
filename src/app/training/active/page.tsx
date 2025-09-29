@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ExerciseTimer, useExerciseTimer } from '@/components/training/ExerciseTimer'
 import { SetTracker } from '@/components/training/SetTracker'
-import { useTraining } from '@/hooks/useTraining-simple'
+import { useTraining } from '@/hooks/useTraining'
 import { useAuth } from '@/hooks'
 import { getExercises } from '@/lib/api/exercises'
 import { type Exercise } from '@/types'
@@ -18,39 +18,39 @@ import { useRouter } from 'next/navigation'
 export default function ActiveTrainingPage() {
   const router = useRouter()
   const { user } = useAuth()
-  const { 
-    activeSession, 
-    loading, 
+  const {
+    activeSession,
+    loading,
     initialized,
-    isActive, 
+    isActive,
     isPaused,
     completeWorkout,
     pauseWorkout,
     resumeWorkout,
-    cancelWorkout
+    cancelWorkout,
   } = useTraining()
-  
+
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null)
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [showExerciseSelector, setShowExerciseSelector] = useState(false)
   const [exercisesLoading, setExercisesLoading] = useState(false)
   const [workoutStartTime] = useState(Date.now())
-  
+
   // Timer hooks
   const {
     currentExerciseTime,
     totalWorkoutTime,
     handleExerciseTimeUpdate,
     resetExerciseTimer,
-    addToTotalTime
+    addToTotalTime,
   } = useExerciseTimer()
 
   // Cargar ejercicios
   useEffect(() => {
     const loadExercises = async () => {
       if (!user) return
-      
+
       try {
         setExercisesLoading(true)
         const data = await getExercises(user.id)
@@ -72,9 +72,10 @@ export default function ActiveTrainingPage() {
     }
   }, [activeSession, loading, initialized, router])
 
-  const filteredExercises = exercises.filter(exercise =>
-    exercise.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
-    exercise.muscle_group_primary.toLowerCase().includes(exerciseSearch.toLowerCase())
+  const filteredExercises = exercises.filter(
+    exercise =>
+      exercise.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
+      exercise.muscle_group_primary.toLowerCase().includes(exerciseSearch.toLowerCase())
   )
 
   const handleCompleteWorkout = async () => {
@@ -95,7 +96,7 @@ export default function ActiveTrainingPage() {
     const hours = Math.floor(elapsed / 3600)
     const minutes = Math.floor((elapsed % 3600) / 60)
     const seconds = elapsed % 60
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
     }
@@ -134,8 +135,8 @@ export default function ActiveTrainingPage() {
           title="No hay sesión activa"
           description="No tienes una sesión de entrenamiento activa. Inicia una nueva sesión para continuar."
           action={{
-            label: "Volver a Training",
-            onClick: () => window.location.href = '/training'
+            label: 'Volver a Training',
+            onClick: () => (window.location.href = '/training'),
           }}
         />
       </AppLayout>
@@ -166,19 +167,25 @@ export default function ActiveTrainingPage() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-3 h-3 rounded-full",
-                isActive ? "bg-green-400 animate-pulse" : 
-                isPaused ? "bg-yellow-400" : "bg-slate-500"
-              )} />
+              <div
+                className={cn(
+                  'w-3 h-3 rounded-full',
+                  isActive
+                    ? 'bg-green-400 animate-pulse'
+                    : isPaused
+                      ? 'bg-yellow-400'
+                      : 'bg-slate-500'
+                )}
+              />
               <span className="text-white font-medium">
-                {isActive ? 'Entrenamiento Activo' :
-                 isPaused ? 'Entrenamiento Pausado' : 'Estado Desconocido'}
+                {isActive
+                  ? 'Entrenamiento Activo'
+                  : isPaused
+                    ? 'Entrenamiento Pausado'
+                    : 'Estado Desconocido'}
               </span>
             </div>
-            <div className="text-sm text-slate-400">
-              Sesión en progreso
-            </div>
+            <div className="text-sm text-slate-400">Sesión en progreso</div>
           </div>
         </Card>
 
@@ -200,12 +207,15 @@ export default function ActiveTrainingPage() {
               <div className="space-y-4">
                 {/* Búsqueda */}
                 <div className="relative">
-                  <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
                   <input
                     type="text"
                     placeholder="Buscar ejercicio..."
                     value={exerciseSearch}
-                    onChange={(e) => setExerciseSearch(e.target.value)}
+                    onChange={e => setExerciseSearch(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -213,11 +223,9 @@ export default function ActiveTrainingPage() {
                 {/* Lista de ejercicios */}
                 <div className="max-h-64 overflow-y-auto space-y-2">
                   {exercisesLoading ? (
-                    <div className="text-center py-8 text-slate-400">
-                      Cargando ejercicios...
-                    </div>
+                    <div className="text-center py-8 text-slate-400">Cargando ejercicios...</div>
                   ) : filteredExercises.length > 0 ? (
-                    filteredExercises.map((exercise) => (
+                    filteredExercises.map(exercise => (
                       <button
                         key={exercise.id}
                         onClick={() => {
@@ -257,7 +265,7 @@ export default function ActiveTrainingPage() {
         <Card className="p-6 bg-background-tertiary border-border-secondary">
           <div className="space-y-4">
             <h4 className="font-medium text-white">Controles de Entrenamiento</h4>
-            
+
             <div className="grid gap-3 md:grid-cols-3">
               {/* Pausa/Reanudar */}
               {isActive ? (

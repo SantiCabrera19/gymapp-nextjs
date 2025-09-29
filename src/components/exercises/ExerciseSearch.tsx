@@ -14,11 +14,11 @@ interface ExerciseSearchProps {
   placeholder?: string
 }
 
-export function ExerciseSearch({ 
-  value, 
-  onChange, 
+export function ExerciseSearch({
+  value,
+  onChange,
   onSelectExercise,
-  placeholder = "Buscar ejercicios por nombre, músculo o equipo..."
+  placeholder = 'Buscar ejercicios por nombre, músculo o equipo...',
 }: ExerciseSearchProps) {
   const [suggestions, setSuggestions] = useState<Exercise[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -81,11 +81,14 @@ export function ExerciseSearch({
   return (
     <div ref={containerRef} className="relative flex-1">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+        <Search
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+          size={20}
+        />
         <Input
           ref={inputRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
           className="pl-10 pr-10"
           onFocus={() => value.length >= 2 && setShowSuggestions(true)}
@@ -104,12 +107,10 @@ export function ExerciseSearch({
       {showSuggestions && (
         <Card className="absolute top-12 left-0 right-0 z-50 max-h-64 overflow-y-auto">
           {loading ? (
-            <div className="p-4 text-center text-slate-400">
-              Buscando...
-            </div>
+            <div className="p-4 text-center text-slate-400">Buscando...</div>
           ) : suggestions.length > 0 ? (
             <div className="py-2">
-              {suggestions.map((exercise) => (
+              {suggestions.map(exercise => (
                 <button
                   key={exercise.id}
                   onClick={() => handleSelectSuggestion(exercise)}
@@ -129,9 +130,7 @@ export function ExerciseSearch({
               ))}
             </div>
           ) : value.length >= 2 ? (
-            <div className="p-4 text-center text-slate-400">
-              No se encontraron ejercicios
-            </div>
+            <div className="p-4 text-center text-slate-400">No se encontraron ejercicios</div>
           ) : null}
         </Card>
       )}

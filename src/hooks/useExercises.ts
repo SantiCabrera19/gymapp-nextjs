@@ -12,7 +12,7 @@ const initialFilters: ExerciseFilters = {
   equipment: [],
   difficulty: [],
   isFavorite: false,
-  recommendedOnly: false
+  recommendedOnly: false,
 }
 
 export function useExercises() {
@@ -20,7 +20,7 @@ export function useExercises() {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [filters, setFilters] = useState<ExerciseFilters>(initialFilters)
   const [hasLoaded, setHasLoaded] = useState(false)
-  
+
   // Hook de timeout para prevenir loading infinito
   const {
     isLoading,
@@ -28,27 +28,28 @@ export function useExercises() {
     error: timeoutError,
     startLoading,
     stopLoading,
-    retry: retryTimeout
+    retry: retryTimeout,
   } = useLoadingTimeout({
     timeout: 12000, // 12 segundos para exercises
-    timeoutMessage: 'La carga de ejercicios está tardando más de lo esperado'
+    timeoutMessage: 'La carga de ejercicios está tardando más de lo esperado',
   })
 
   // Cargar ejercicios con timeout y error handling robusto
   useEffect(() => {
     let mounted = true
-    
+
     const loadExercises = async () => {
       try {
         // Solo mostrar loading en primera carga o si no hay datos
         if (!hasLoaded) {
           startLoading()
         }
-        
-        const data = filters.recommendedOnly && profile
-          ? await getRecommendedExercises(profile.experience_level || 'beginner')
-          : await getExercises(user?.id)
-        
+
+        const data =
+          filters.recommendedOnly && profile
+            ? await getRecommendedExercises(profile.experience_level || 'beginner')
+            : await getExercises(user?.id)
+
         if (mounted) {
           setExercises(data)
           setHasLoaded(true)
@@ -59,13 +60,16 @@ export function useExercises() {
         if (mounted) {
           setExercises([])
           setHasLoaded(true)
-          stopLoading('Error cargando ejercicios: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+          stopLoading(
+            'Error cargando ejercicios: ' +
+              (error instanceof Error ? error.message : 'Error desconocido')
+          )
         }
       }
     }
 
     loadExercises()
-    
+
     return () => {
       mounted = false
     }
@@ -94,7 +98,8 @@ export function useExercises() {
 
       // Filtro por dificultad
       if (filters.difficulty.length > 0) {
-        if (!exercise.difficulty_level || !filters.difficulty.includes(exercise.difficulty_level)) return false
+        if (!exercise.difficulty_level || !filters.difficulty.includes(exercise.difficulty_level))
+          return false
       }
 
       // Filtro por favoritos
@@ -128,6 +133,6 @@ export function useExercises() {
     resetFilters,
     totalCount: exercises.length,
     filteredCount: filteredExercises.length,
-    retry
+    retry,
   }
 }

@@ -1,7 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Play, Edit, Copy, Trash2, Clock, Dumbbell, Target, Calendar } from 'lucide-react'
+import {
+  ArrowLeft,
+  Play,
+  Edit,
+  Copy,
+  Trash2,
+  Clock,
+  Dumbbell,
+  Target,
+  Calendar,
+} from 'lucide-react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Button, Card } from '@/components/ui'
 import { Breadcrumbs } from '@/components/ui'
@@ -21,7 +31,7 @@ export default function RoutinePage({ params }: RoutinePageProps) {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
   const { requireAuth } = useAuthAction()
-  
+
   const [routine, setRoutine] = useState<Routine | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -101,13 +111,22 @@ export default function RoutinePage({ params }: RoutinePageProps) {
   const getDifficultyConfig = (level: string) => {
     switch (level) {
       case 'beginner':
-        return { label: 'Principiante', color: 'text-green-400 bg-green-500/20 border-green-500/30' }
+        return {
+          label: 'Principiante',
+          color: 'text-green-400 bg-green-500/20 border-green-500/30',
+        }
       case 'intermediate':
-        return { label: 'Intermedio', color: 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30' }
+        return {
+          label: 'Intermedio',
+          color: 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30',
+        }
       case 'advanced':
         return { label: 'Avanzado', color: 'text-red-400 bg-red-500/20 border-red-500/30' }
       default:
-        return { label: level, color: 'text-text-secondary bg-background-card border-border-primary' }
+        return {
+          label: level,
+          color: 'text-text-secondary bg-background-card border-border-primary',
+        }
     }
   }
 
@@ -137,21 +156,21 @@ export default function RoutinePage({ params }: RoutinePageProps) {
     return (
       <AppLayout>
         <div className="flex-1 space-y-6 p-6">
-          <Breadcrumbs 
+          <Breadcrumbs
             items={[
               { label: 'Dashboard', href: '/dashboard' },
               { label: 'Rutinas', href: '/routines' },
-              { label: 'Rutina', href: `/routines/${params.id}`, current: true }
-            ]} 
+              { label: 'Rutina', href: `/routines/${params.id}`, current: true },
+            ]}
           />
 
           <EmptyState
             icon={<Target size={48} />}
             title="Rutina no encontrada"
-            description={error || "La rutina que buscas no existe o no tienes permisos para verla."}
+            description={error || 'La rutina que buscas no existe o no tienes permisos para verla.'}
             action={{
-              label: "Volver a Rutinas",
-              onClick: () => router.push('/routines')
+              label: 'Volver a Rutinas',
+              onClick: () => router.push('/routines'),
             }}
           />
         </div>
@@ -162,18 +181,20 @@ export default function RoutinePage({ params }: RoutinePageProps) {
   const difficulty = getDifficultyConfig(routine.difficulty_level)
   const exerciseCount = routine.exercises?.length || 0
   const totalSets = routine.exercises?.reduce((sum, ex) => sum + (ex.sets || 0), 0) || 0
-  const muscleGroups = Array.from(new Set(routine.exercises?.map(ex => ex.exercise?.muscle_group_primary).filter(Boolean) || []))
+  const muscleGroups = Array.from(
+    new Set(routine.exercises?.map(ex => ex.exercise?.muscle_group_primary).filter(Boolean) || [])
+  )
 
   return (
     <AppLayout>
       <div className="flex-1 space-y-6 p-6 max-w-4xl mx-auto">
         {/* Breadcrumbs */}
-        <Breadcrumbs 
+        <Breadcrumbs
           items={[
             { label: 'Dashboard', href: '/dashboard' },
             { label: 'Rutinas', href: '/routines' },
-            { label: routine.name, href: `/routines/${params.id}`, current: true }
-          ]} 
+            { label: routine.name, href: `/routines/${params.id}`, current: true },
+          ]}
         />
 
         {/* Header */}
@@ -189,13 +210,9 @@ export default function RoutinePage({ params }: RoutinePageProps) {
               Volver
             </Button>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-white">
-                {routine.name}
-              </h1>
+              <h1 className="text-3xl font-bold tracking-tight text-white">{routine.name}</h1>
               {routine.description && (
-                <p className="text-text-secondary mt-1">
-                  {routine.description}
-                </p>
+                <p className="text-text-secondary mt-1">{routine.description}</p>
               )}
             </div>
           </div>
@@ -213,19 +230,13 @@ export default function RoutinePage({ params }: RoutinePageProps) {
               )}
               Duplicar
             </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleEdit}
-            >
+
+            <Button variant="outline" onClick={handleEdit}>
               <Edit size={16} className="mr-2" />
               Editar
             </Button>
-            
-            <Button
-              onClick={handleStartTraining}
-              className="min-w-[140px]"
-            >
+
+            <Button onClick={handleStartTraining} className="min-w-[140px]">
               <Play size={16} className="mr-2" />
               Iniciar Entrenamiento
             </Button>
@@ -267,7 +278,9 @@ export default function RoutinePage({ params }: RoutinePageProps) {
                     <Clock size={20} className="text-blue-400" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-white">~{routine.estimated_duration_minutes}</div>
+                    <div className="text-xl font-bold text-white">
+                      ~{routine.estimated_duration_minutes}
+                    </div>
                     <div className="text-sm text-text-secondary">Minutos</div>
                   </div>
                 </div>
@@ -288,9 +301,7 @@ export default function RoutinePage({ params }: RoutinePageProps) {
 
             {/* Exercises List */}
             <Card className="p-6">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Ejercicios de la Rutina
-              </h2>
+              <h2 className="text-xl font-semibold text-white mb-4">Ejercicios de la Rutina</h2>
 
               {exerciseCount === 0 ? (
                 <div className="text-center py-8">
@@ -333,23 +344,31 @@ export default function RoutinePage({ params }: RoutinePageProps) {
                       {/* Configuration */}
                       <div className="flex items-center gap-6 text-sm">
                         <div className="text-center">
-                          <div className="text-white font-semibold">{routineExercise.sets || 3}</div>
+                          <div className="text-white font-semibold">
+                            {routineExercise.sets || 3}
+                          </div>
                           <div className="text-text-tertiary text-xs">Sets</div>
                         </div>
 
                         <div className="text-center">
-                          <div className="text-white font-semibold">{routineExercise.reps || 10}</div>
+                          <div className="text-white font-semibold">
+                            {routineExercise.reps || 10}
+                          </div>
                           <div className="text-text-tertiary text-xs">Reps</div>
                         </div>
 
                         <div className="text-center">
-                          <div className="text-white font-semibold">{routineExercise.rest_seconds || 60}s</div>
+                          <div className="text-white font-semibold">
+                            {routineExercise.rest_seconds || 60}s
+                          </div>
                           <div className="text-text-tertiary text-xs">Descanso</div>
                         </div>
 
                         {routineExercise.weight_suggestion_kg && (
                           <div className="text-center">
-                            <div className="text-white font-semibold">{routineExercise.weight_suggestion_kg}kg</div>
+                            <div className="text-white font-semibold">
+                              {routineExercise.weight_suggestion_kg}kg
+                            </div>
                             <div className="text-text-tertiary text-xs">Peso sugerido</div>
                           </div>
                         )}
@@ -365,17 +384,17 @@ export default function RoutinePage({ params }: RoutinePageProps) {
           <div className="space-y-6">
             {/* Routine Info */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Información de la Rutina
-              </h3>
-              
+              <h3 className="text-lg font-semibold text-white mb-4">Información de la Rutina</h3>
+
               <div className="space-y-4">
                 <div>
                   <label className="text-sm text-text-tertiary">Dificultad</label>
-                  <div className={cn(
-                    "inline-flex px-3 py-1 rounded-full text-sm font-medium border mt-1",
-                    difficulty.color
-                  )}>
+                  <div
+                    className={cn(
+                      'inline-flex px-3 py-1 rounded-full text-sm font-medium border mt-1',
+                      difficulty.color
+                    )}
+                  >
                     {difficulty.label}
                   </div>
                 </div>
@@ -388,7 +407,7 @@ export default function RoutinePage({ params }: RoutinePageProps) {
                       {new Date(routine.created_at).toLocaleDateString('es-ES', {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
                       })}
                     </span>
                   </div>
@@ -403,7 +422,7 @@ export default function RoutinePage({ params }: RoutinePageProps) {
                         {new Date(routine.updated_at).toLocaleDateString('es-ES', {
                           year: 'numeric',
                           month: 'long',
-                          day: 'numeric'
+                          day: 'numeric',
                         })}
                       </span>
                     </div>
@@ -432,10 +451,8 @@ export default function RoutinePage({ params }: RoutinePageProps) {
             {/* Muscle Groups */}
             {muscleGroups.length > 0 && (
               <Card className="p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">
-                  Músculos Trabajados
-                </h3>
-                
+                <h3 className="text-lg font-semibold text-white mb-4">Músculos Trabajados</h3>
+
                 <div className="flex flex-wrap gap-2">
                   {muscleGroups.map((muscle, index) => (
                     <span
@@ -451,28 +468,19 @@ export default function RoutinePage({ params }: RoutinePageProps) {
 
             {/* Actions */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Acciones
-              </h3>
-              
+              <h3 className="text-lg font-semibold text-white mb-4">Acciones</h3>
+
               <div className="space-y-3">
-                <Button
-                  onClick={handleStartTraining}
-                  className="w-full"
-                >
+                <Button onClick={handleStartTraining} className="w-full">
                   <Play size={16} className="mr-2" />
                   Iniciar Entrenamiento
                 </Button>
-                
-                <Button
-                  onClick={handleEdit}
-                  variant="outline"
-                  className="w-full"
-                >
+
+                <Button onClick={handleEdit} variant="outline" className="w-full">
                   <Edit size={16} className="mr-2" />
                   Editar Rutina
                 </Button>
-                
+
                 <Button
                   onClick={handleDuplicate}
                   variant="outline"
@@ -486,7 +494,7 @@ export default function RoutinePage({ params }: RoutinePageProps) {
                   )}
                   Duplicar Rutina
                 </Button>
-                
+
                 <Button
                   onClick={handleDelete}
                   variant="outline"

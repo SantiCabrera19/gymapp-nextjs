@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -82,19 +82,17 @@ export default function LoginPage() {
     }
   }
 
-  const handleInputChange = (field: keyof LoginForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }))
-    // Clear field error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+  const handleInputChange =
+    (field: keyof LoginForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm(prev => ({ ...prev, [field]: e.target.value }))
+      // Clear field error when user starts typing
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: undefined }))
+      }
     }
-  }
 
   return (
-    <AuthLayout
-      title="Bienvenido de vuelta"
-      subtitle="Inicia sesión para continuar tu progreso"
-    >
+    <AuthLayout title="Bienvenido de vuelta" subtitle="Inicia sesión para continuar tu progreso">
       <Card className="border-border-primary/50">
         <CardContent className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">

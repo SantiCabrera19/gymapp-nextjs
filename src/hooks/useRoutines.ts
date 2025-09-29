@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from './useAuth'
-import { 
-  getUserRoutines, 
-  deleteRoutine, 
-  duplicateRoutine,
-  type Routine 
-} from '@/lib/api/routines'
+import { getUserRoutines, deleteRoutine, duplicateRoutine, type Routine } from '@/lib/api/routines'
 
 export interface RoutineFilters {
   search: string
@@ -22,7 +17,7 @@ const initialFilters: RoutineFilters = {
   difficulty: [],
   tags: [],
   sortBy: 'created_at',
-  sortOrder: 'desc'
+  sortOrder: 'desc',
 }
 
 export function useRoutines() {
@@ -49,7 +44,7 @@ export function useRoutines() {
       const errorMessage = err instanceof Error ? err.message : 'Error loading routines'
       setError(errorMessage)
       setRoutines([])
-      
+
       // Log error for debugging
       if (process.env.NODE_ENV === 'development') {
         console.error('Error loading routines:', err)
@@ -71,25 +66,22 @@ export function useRoutines() {
     // Filtro por búsqueda
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
-      filtered = filtered.filter(routine =>
-        routine.name.toLowerCase().includes(searchLower) ||
-        routine.description?.toLowerCase().includes(searchLower) ||
-        routine.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        routine =>
+          routine.name.toLowerCase().includes(searchLower) ||
+          routine.description?.toLowerCase().includes(searchLower) ||
+          routine.tags?.some(tag => tag.toLowerCase().includes(searchLower))
       )
     }
 
     // Filtro por dificultad
     if (filters.difficulty.length > 0) {
-      filtered = filtered.filter(routine =>
-        filters.difficulty.includes(routine.difficulty_level)
-      )
+      filtered = filtered.filter(routine => filters.difficulty.includes(routine.difficulty_level))
     }
 
     // Filtro por tags
     if (filters.tags.length > 0) {
-      filtered = filtered.filter(routine =>
-        routine.tags?.some(tag => filters.tags.includes(tag))
-      )
+      filtered = filtered.filter(routine => routine.tags?.some(tag => filters.tags.includes(tag)))
     }
 
     // Ordenamiento
@@ -127,12 +119,12 @@ export function useRoutines() {
   }, [routines, filters])
 
   // Actualizar filtros
-  const updateFilter = useCallback(<K extends keyof RoutineFilters>(
-    key: K,
-    value: RoutineFilters[K]
-  ) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
-  }, [])
+  const updateFilter = useCallback(
+    <K extends keyof RoutineFilters>(key: K, value: RoutineFilters[K]) => {
+      setFilters(prev => ({ ...prev, [key]: value }))
+    },
+    []
+  )
 
   // Resetear filtros
   const resetFilters = useCallback(() => {
@@ -140,35 +132,41 @@ export function useRoutines() {
   }, [])
 
   // Duplicar rutina
-  const handleDuplicateRoutine = useCallback(async (routine: Routine, newName?: string) => {
-    if (!user?.id) return
+  const handleDuplicateRoutine = useCallback(
+    async (routine: Routine, newName?: string) => {
+      if (!user?.id) return
 
-    try {
-      setError(null)
-      const duplicatedRoutine = await duplicateRoutine(routine.id, user.id, newName)
-      setRoutines(prev => [duplicatedRoutine, ...prev])
-      return duplicatedRoutine
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error duplicating routine'
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    }
-  }, [user?.id])
+      try {
+        setError(null)
+        const duplicatedRoutine = await duplicateRoutine(routine.id, user.id, newName)
+        setRoutines(prev => [duplicatedRoutine, ...prev])
+        return duplicatedRoutine
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error duplicating routine'
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      }
+    },
+    [user?.id]
+  )
 
   // Eliminar rutina
-  const handleDeleteRoutine = useCallback(async (routineId: string) => {
-    if (!user?.id) return
+  const handleDeleteRoutine = useCallback(
+    async (routineId: string) => {
+      if (!user?.id) return
 
-    try {
-      setError(null)
-      await deleteRoutine(routineId, user.id)
-      setRoutines(prev => prev.filter(routine => routine.id !== routineId))
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error deleting routine'
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    }
-  }, [user?.id])
+      try {
+        setError(null)
+        await deleteRoutine(routineId, user.id)
+        setRoutines(prev => prev.filter(routine => routine.id !== routineId))
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error deleting routine'
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      }
+    },
+    [user?.id]
+  )
 
   // Obtener todas las etiquetas únicas
   const availableTags = useMemo(() => {
@@ -186,12 +184,15 @@ export function useRoutines() {
       byDifficulty: {
         beginner: routines.filter(r => r.difficulty_level === 'beginner').length,
         intermediate: routines.filter(r => r.difficulty_level === 'intermediate').length,
-        advanced: routines.filter(r => r.difficulty_level === 'advanced').length
+        advanced: routines.filter(r => r.difficulty_level === 'advanced').length,
       },
-      averageDuration: routines.length > 0 
-        ? Math.round(routines.reduce((sum, r) => sum + r.estimated_duration_minutes, 0) / routines.length)
-        : 0,
-      totalExercises: routines.reduce((sum, r) => sum + (r.exercises?.length || 0), 0)
+      averageDuration:
+        routines.length > 0
+          ? Math.round(
+              routines.reduce((sum, r) => sum + r.estimated_duration_minutes, 0) / routines.length
+            )
+          : 0,
+      totalExercises: routines.reduce((sum, r) => sum + (r.exercises?.length || 0), 0),
     }
   }, [routines])
 
@@ -213,6 +214,6 @@ export function useRoutines() {
     handleDeleteRoutine,
 
     // Utilidades
-    clearError: () => setError(null)
+    clearError: () => setError(null),
   }
 }

@@ -23,7 +23,7 @@ export function WorkoutControls({
   onComplete,
   onCancel,
   loading = false,
-  className
+  className,
 }: WorkoutControlsProps) {
   const [showConfirm, setShowConfirm] = useState<'complete' | 'cancel' | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -60,7 +60,7 @@ export function WorkoutControls({
   }
 
   return (
-    <Card className={cn("p-4", className)}>
+    <Card className={cn('p-4', className)}>
       <div className="space-y-4">
         {/* Controles principales */}
         <div className="flex gap-3">
@@ -99,10 +99,10 @@ export function WorkoutControls({
             onClick={handleComplete}
             disabled={loading || !!actionLoading}
             className={cn(
-              "flex-1 transition-all",
+              'flex-1 transition-all',
               showConfirm === 'complete'
-                ? "bg-green-600 hover:bg-green-700 text-white"
-                : "bg-green-500 hover:bg-green-600 text-white"
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-green-500 hover:bg-green-600 text-white'
             )}
           >
             {actionLoading === 'complete' ? (
@@ -119,10 +119,10 @@ export function WorkoutControls({
             onClick={handleCancel}
             disabled={loading || !!actionLoading}
             className={cn(
-              "flex-1 transition-all",
+              'flex-1 transition-all',
               showConfirm === 'cancel'
-                ? "border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                : "border-slate-600 text-slate-400 hover:text-red-400 hover:border-red-500/50"
+                ? 'border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                : 'border-slate-600 text-slate-400 hover:text-red-400 hover:border-red-500/50'
             )}
           >
             {actionLoading === 'cancel' ? (
@@ -136,18 +136,19 @@ export function WorkoutControls({
 
         {/* Mensajes de confirmación */}
         {showConfirm && (
-          <div className={cn(
-            "p-3 rounded-lg border text-sm",
-            showConfirm === 'complete'
-              ? "bg-green-500/10 border-green-500/20 text-green-400"
-              : "bg-red-500/10 border-red-500/20 text-red-400"
-          )}>
+          <div
+            className={cn(
+              'p-3 rounded-lg border text-sm',
+              showConfirm === 'complete'
+                ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                : 'bg-red-500/10 border-red-500/20 text-red-400'
+            )}
+          >
             <div className="flex items-center justify-between">
               <span>
                 {showConfirm === 'complete'
                   ? '¿Completar entrenamiento? Se guardará automáticamente.'
-                  : '¿Cancelar entrenamiento? Se perderán todos los datos.'
-                }
+                  : '¿Cancelar entrenamiento? Se perderán todos los datos.'}
               </span>
               <button
                 onClick={() => setShowConfirm(null)}
@@ -161,14 +162,18 @@ export function WorkoutControls({
 
         {/* Estado actual */}
         <div className="flex items-center justify-center gap-2 text-sm text-slate-400">
-          <div className={cn(
-            "w-2 h-2 rounded-full",
-            isActive ? "bg-green-400 animate-pulse" : 
-            isPaused ? "bg-yellow-400" : "bg-slate-500"
-          )} />
+          <div
+            className={cn(
+              'w-2 h-2 rounded-full',
+              isActive ? 'bg-green-400 animate-pulse' : isPaused ? 'bg-yellow-400' : 'bg-slate-500'
+            )}
+          />
           <span>
-            {isActive ? 'Entrenamiento activo' :
-             isPaused ? 'Entrenamiento pausado' : 'Estado desconocido'}
+            {isActive
+              ? 'Entrenamiento activo'
+              : isPaused
+                ? 'Entrenamiento pausado'
+                : 'Estado desconocido'}
           </span>
         </div>
       </div>

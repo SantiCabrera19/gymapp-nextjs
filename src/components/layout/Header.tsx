@@ -13,7 +13,6 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { isAuthenticated, profile } = useAuth()
   const router = useRouter()
-  
 
   const handleSignOut = async () => {
     try {
@@ -37,12 +36,7 @@ export function Header({ onMenuClick }: HeaderProps) {
     <header className="fixed top-0 left-0 lg:left-64 right-0 z-50 border-b border-border-primary bg-background-secondary/90 backdrop-blur-lg backdrop-saturate-150 supports-[backdrop-filter]:bg-background-secondary/80 shadow-sm">
       <div className="flex h-16 items-center gap-3 px-5 lg:px-8">
         {/* Mobile menu button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="lg:hidden"
-          onClick={onMenuClick}
-        >
+        <Button variant="ghost" size="sm" className="lg:hidden" onClick={onMenuClick}>
           <Menu className="h-5 w-5" />
         </Button>
 
@@ -61,15 +55,15 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* User menu */}
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <Avatar 
-                size="sm" 
+              <Avatar
+                size="sm"
                 src={profile?.avatar_url || undefined}
-                alt={profile?.full_name || profile?.username || 'Usuario'}
-                fallback={profile?.full_name?.[0] || profile?.username?.[0] || 'U'}
+                alt={profile?.full_name || 'Usuario'}
+                fallback={profile?.full_name?.[0] || profile?.email?.[0] || 'U'}
               />
               <div className="hidden sm:block">
                 <p className="text-sm font-medium text-text-primary">
-                  {profile?.full_name || profile?.username || 'Usuario'}
+                  {profile?.full_name || profile?.email?.split('@')[0] || 'Usuario'}
                 </p>
                 <p className="text-xs text-text-tertiary">
                   {profile?.email || 'usuario@email.com'}
@@ -81,16 +75,16 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 asChild
                 className="transition-all duration-200 hover:scale-105 active:scale-95 hover:bg-white/10"
               >
                 <a href="/auth/login">Iniciar Sesión</a>
               </Button>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 asChild
                 className="transition-all duration-200 hover:scale-105 active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl border-0"
               >

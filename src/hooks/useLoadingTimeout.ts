@@ -26,14 +26,14 @@ export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}) {
   const {
     timeout = 10000, // 10 segundos máximo
     onTimeout,
-    timeoutMessage = 'La carga está tomando más tiempo del esperado. Por favor, intenta recargar la página.'
+    timeoutMessage = 'La carga está tomando más tiempo del esperado. Por favor, intenta recargar la página.',
   } = options
 
   const [state, setState] = useState<LoadingState>({
     isLoading: false,
     hasTimedOut: false,
     error: null,
-    startTime: null
+    startTime: null,
   })
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -56,7 +56,7 @@ export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}) {
       isLoading: true,
       hasTimedOut: false,
       error: null,
-      startTime: Date.now()
+      startTime: Date.now(),
     })
 
     // Limpiar timeout anterior si existe
@@ -72,7 +72,7 @@ export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}) {
         ...prev,
         isLoading: false,
         hasTimedOut: true,
-        error: timeoutMessage
+        error: timeoutMessage,
       }))
 
       onTimeout?.()
@@ -90,7 +90,7 @@ export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}) {
     setState(prev => ({
       ...prev,
       isLoading: false,
-      error: error || null
+      error: error || null,
     }))
   }, [])
 
@@ -106,7 +106,7 @@ export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}) {
       isLoading: false,
       hasTimedOut: false,
       error: null,
-      startTime: null
+      startTime: null,
     })
   }, [])
 
@@ -122,7 +122,7 @@ export function useLoadingTimeout(options: UseLoadingTimeoutOptions = {}) {
     reset,
     retry,
     // Utilidades
-    isLoadingTooLong: state.startTime ? (Date.now() - state.startTime) > (timeout * 0.7) : false,
-    elapsedTime: state.startTime ? Date.now() - state.startTime : 0
+    isLoadingTooLong: state.startTime ? Date.now() - state.startTime > timeout * 0.7 : false,
+    elapsedTime: state.startTime ? Date.now() - state.startTime : 0,
   }
 }

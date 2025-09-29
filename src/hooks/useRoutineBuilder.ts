@@ -26,7 +26,7 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
     difficulty_level: 'beginner',
     estimated_duration_minutes: 60,
     exercises: [],
-    ...initialData
+    ...initialData,
   })
 
   const [isModified, setIsModified] = useState(false)
@@ -48,12 +48,12 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
         order: prev.exercises.length + 1,
         sets: 3,
         reps: 10,
-        rest_seconds: 60
+        rest_seconds: 60,
       }
 
       return {
         ...prev,
-        exercises: [...prev.exercises, newExercise]
+        exercises: [...prev.exercises, newExercise],
       }
     })
     setIsModified(true)
@@ -65,7 +65,7 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
       ...prev,
       exercises: prev.exercises
         .filter(ex => ex.id !== exerciseId)
-        .map((ex, index) => ({ ...ex, order: index + 1 })) // Reordenar
+        .map((ex, index) => ({ ...ex, order: index + 1 })), // Reordenar
     }))
     setIsModified(true)
   }, [])
@@ -76,28 +76,29 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
       const exercises = [...prev.exercises]
       const [removed] = exercises.splice(fromIndex, 1)
       exercises.splice(toIndex, 0, removed)
-      
+
       // Actualizar orden
       const reordered = exercises.map((ex, index) => ({ ...ex, order: index + 1 }))
-      
+
       return { ...prev, exercises: reordered }
     })
     setIsModified(true)
   }, [])
 
   // Actualizar configuración de ejercicio
-  const updateExerciseConfig = useCallback((
-    exerciseId: string, 
-    config: Partial<Pick<RoutineExercise, 'sets' | 'reps' | 'rest_seconds' | 'notes'>>
-  ) => {
-    setRoutine(prev => ({
-      ...prev,
-      exercises: prev.exercises.map(ex => 
-        ex.id === exerciseId ? { ...ex, ...config } : ex
-      )
-    }))
-    setIsModified(true)
-  }, [])
+  const updateExerciseConfig = useCallback(
+    (
+      exerciseId: string,
+      config: Partial<Pick<RoutineExercise, 'sets' | 'reps' | 'rest_seconds' | 'notes'>>
+    ) => {
+      setRoutine(prev => ({
+        ...prev,
+        exercises: prev.exercises.map(ex => (ex.id === exerciseId ? { ...ex, ...config } : ex)),
+      }))
+      setIsModified(true)
+    },
+    []
+  )
 
   // Agregar múltiples ejercicios
   const addMultipleExercises = useCallback((exercises: Exercise[]) => {
@@ -105,17 +106,19 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
       const existingIds = new Set(prev.exercises.map(ex => ex.id))
       const newExercises = exercises
         .filter(ex => !existingIds.has(ex.id))
-        .map((exercise, index): RoutineExercise => ({
-          ...exercise,
-          order: prev.exercises.length + index + 1,
-          sets: 3,
-          reps: 10,
-          rest_seconds: 60
-        }))
+        .map(
+          (exercise, index): RoutineExercise => ({
+            ...exercise,
+            order: prev.exercises.length + index + 1,
+            sets: 3,
+            reps: 10,
+            rest_seconds: 60,
+          })
+        )
 
       return {
         ...prev,
-        exercises: [...prev.exercises, ...newExercises]
+        exercises: [...prev.exercises, ...newExercises],
       }
     })
     setIsModified(true)
@@ -124,32 +127,35 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
   // Calcular duración estimada basada en ejercicios
   const calculateEstimatedDuration = useCallback(() => {
     const totalSets = routine.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0)
-    const totalRestTime = routine.exercises.reduce((sum, ex) => sum + ((ex.rest_seconds || 0) * (ex.sets || 0)), 0)
+    const totalRestTime = routine.exercises.reduce(
+      (sum, ex) => sum + (ex.rest_seconds || 0) * (ex.sets || 0),
+      0
+    )
     const exerciseTime = totalSets * 45 // 45 segundos promedio por set
     const warmupCooldown = 10 // 10 minutos de calentamiento y enfriamiento
-    
+
     return Math.ceil((exerciseTime + totalRestTime) / 60) + warmupCooldown
   }, [routine.exercises])
 
   // Validar rutina
   const validateRoutine = useCallback(() => {
     const errors: string[] = []
-    
+
     if (!routine.name.trim()) {
       errors.push('El nombre de la rutina es requerido')
     }
-    
+
     if (routine.exercises.length === 0) {
       errors.push('La rutina debe tener al menos un ejercicio')
     }
-    
+
     if (routine.exercises.length > 15) {
       errors.push('La rutina no puede tener más de 15 ejercicios')
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     }
   }, [routine])
 
@@ -160,7 +166,7 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
       description: '',
       difficulty_level: 'beginner',
       estimated_duration_minutes: 60,
-      exercises: []
+      exercises: [],
     })
     setIsModified(false)
   }, [])
@@ -176,6 +182,6 @@ export function useRoutineBuilder(initialData?: Partial<RoutineData>) {
     addMultipleExercises,
     calculateEstimatedDuration,
     validateRoutine,
-    resetRoutine
+    resetRoutine,
   }
 }

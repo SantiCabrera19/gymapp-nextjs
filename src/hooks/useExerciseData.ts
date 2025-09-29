@@ -6,13 +6,13 @@ import {
   getExerciseRecords,
   getExerciseStats,
   getExerciseProgress,
-  toggleExerciseFavorite
+  toggleExerciseFavorite,
 } from '@/lib/api/user-exercises'
 import type {
   ExerciseRecord,
   ExerciseStats,
   ProgressDataPoint,
-  ChartDataPoint
+  ChartDataPoint,
 } from '@/types/user-exercises'
 
 // =====================================================
@@ -123,29 +123,29 @@ export function useExerciseProgress(exerciseId: string, months: number = 6) {
     loadProgress()
   }, [user, exerciseId, months])
 
-  return { 
-    progress, 
-    loading, 
-    error, 
+  return {
+    progress,
+    loading,
+    error,
     hasData: progress.length > 0,
     // Datos transformados para gráficos
     chartData: {
-      weight: progress.map(p => ({ 
-        date: p.date, 
-        value: p.weight || 0, 
-        label: `${p.weight || 0}kg` 
+      weight: progress.map(p => ({
+        date: p.date,
+        value: p.weight || 0,
+        label: `${p.weight || 0}kg`,
       })),
-      volume: progress.map(p => ({ 
-        date: p.date, 
-        value: p.volume || 0, 
-        label: `${p.volume || 0}kg` 
+      volume: progress.map(p => ({
+        date: p.date,
+        value: p.volume || 0,
+        label: `${p.volume || 0}kg`,
       })),
-      reps: progress.map(p => ({ 
-        date: p.date, 
-        value: p.reps || 0, 
-        label: `${p.reps || 0} reps` 
-      }))
-    }
+      reps: progress.map(p => ({
+        date: p.date,
+        value: p.reps || 0,
+        label: `${p.reps || 0} reps`,
+      })),
+    },
   }
 }
 
@@ -203,7 +203,7 @@ export function useExerciseDetail(exerciseId: string) {
     errors: {
       records: records.error,
       stats: stats.error,
-      progress: progress.error
-    }
+      progress: progress.error,
+    },
   }
 }

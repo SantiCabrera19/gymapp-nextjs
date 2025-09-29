@@ -20,7 +20,7 @@ export function PhysicalDataSection({
   isActive,
   onFocus,
   onBlur,
-  onChange
+  onChange,
 }: PhysicalDataSectionProps) {
   // Inicializar con la preferencia del usuario
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>(
@@ -60,9 +60,9 @@ export function PhysicalDataSection({
     onChange('height_cm', Math.round(cmValue))
   }
 
-  const displayWeight = data.weight_kg 
-    ? weightUnit === 'kg' 
-      ? data.weight_kg 
+  const displayWeight = data.weight_kg
+    ? weightUnit === 'kg'
+      ? data.weight_kg
       : Math.round(convertWeight(data.weight_kg, 'kg', 'lbs') * 10) / 10
     : ''
 
@@ -73,10 +73,12 @@ export function PhysicalDataSection({
     : ''
 
   return (
-    <Card className={cn(
-      "transition-all duration-200",
-      isActive && "ring-2 ring-accent-primary/50 shadow-lg"
-    )}>
+    <Card
+      className={cn(
+        'transition-all duration-200',
+        isActive && 'ring-2 ring-accent-primary/50 shadow-lg'
+      )}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Scale className="h-5 w-5 text-accent-primary" />
@@ -92,7 +94,7 @@ export function PhysicalDataSection({
                 label="Peso"
                 placeholder={weightUnit === 'kg' ? '70' : '154'}
                 value={displayWeight}
-                onChange={(e) => handleWeightChange(e.target.value)}
+                onChange={e => handleWeightChange(e.target.value)}
                 onFocus={onFocus}
                 onBlur={onBlur}
                 error={errors.weight_kg}
@@ -105,32 +107,32 @@ export function PhysicalDataSection({
             <div className="flex rounded-md border border-border-primary overflow-hidden mb-1">
               <button
                 type="button"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault()
                   e.stopPropagation()
                   setWeightUnit('kg')
                 }}
                 className={cn(
-                  "px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
+                  'px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
                   weightUnit === 'kg'
-                    ? "bg-accent-primary text-white"
-                    : "bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary"
+                    ? 'bg-accent-primary text-white'
+                    : 'bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
                 )}
               >
                 kg
               </button>
               <button
                 type="button"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault()
                   e.stopPropagation()
                   setWeightUnit('lbs')
                 }}
                 className={cn(
-                  "px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
+                  'px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
                   weightUnit === 'lbs'
-                    ? "bg-accent-primary text-white"
-                    : "bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary"
+                    ? 'bg-accent-primary text-white'
+                    : 'bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
                 )}
               >
                 lbs
@@ -147,7 +149,7 @@ export function PhysicalDataSection({
                 label="Altura"
                 placeholder={heightUnit === 'cm' ? '175' : '5.74'}
                 value={displayHeight}
-                onChange={(e) => handleHeightChange(e.target.value)}
+                onChange={e => handleHeightChange(e.target.value)}
                 onFocus={onFocus}
                 onBlur={onBlur}
                 error={errors.height_cm}
@@ -160,32 +162,32 @@ export function PhysicalDataSection({
             <div className="flex rounded-md border border-border-primary overflow-hidden mb-1">
               <button
                 type="button"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault()
                   e.stopPropagation()
                   setHeightUnit('cm')
                 }}
                 className={cn(
-                  "px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
+                  'px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
                   heightUnit === 'cm'
-                    ? "bg-accent-primary text-white"
-                    : "bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary"
+                    ? 'bg-accent-primary text-white'
+                    : 'bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
                 )}
               >
                 cm
               </button>
               <button
                 type="button"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault()
                   e.stopPropagation()
                   setHeightUnit('ft')
                 }}
                 className={cn(
-                  "px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
+                  'px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
                   heightUnit === 'ft'
-                    ? "bg-accent-primary text-white"
-                    : "bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary"
+                    ? 'bg-accent-primary text-white'
+                    : 'bg-background-secondary text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
                 )}
               >
                 ft
@@ -200,7 +202,7 @@ export function PhysicalDataSection({
             label="Fecha de nacimiento"
             type="date"
             value={data.date_of_birth || ''}
-            onChange={(e) => onChange('date_of_birth', e.target.value)}
+            onChange={e => onChange('date_of_birth', e.target.value)}
             onFocus={onFocus}
             onBlur={onBlur}
             error={errors.date_of_birth}
@@ -213,7 +215,7 @@ export function PhysicalDataSection({
         {data.weight_kg && data.height_cm && (
           <div className="p-3 bg-background-tertiary/30 rounded-md">
             <div className="text-sm font-medium text-text-primary">
-              IMC: {((data.weight_kg / Math.pow(data.height_cm / 100, 2)).toFixed(1))}
+              IMC: {(data.weight_kg / Math.pow(data.height_cm / 100, 2)).toFixed(1)}
             </div>
             <div className="text-xs text-text-tertiary">
               Índice de Masa Corporal calculado automáticamente

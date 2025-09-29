@@ -35,15 +35,20 @@ export const MUSCLE_GROUPS = [
   { id: 'legs', name: 'Piernas', icon: '🦵', color: 'bg-green-500' },
   { id: 'shoulders', name: 'Hombros', icon: '🏋️', color: 'bg-yellow-500' },
   { id: 'arms', name: 'Brazos', icon: '💪', color: 'bg-purple-500' },
-  { id: 'core', name: 'Core', icon: '🔥', color: 'bg-orange-500' }
+  { id: 'core', name: 'Core', icon: '🔥', color: 'bg-orange-500' },
 ] as const
 
 export const EQUIPMENT_TYPES = [
-  'barbell', 'dumbbell', 'bodyweight', 'machine', 'cable', 'kettlebell'
+  'barbell',
+  'dumbbell',
+  'bodyweight',
+  'machine',
+  'cable',
+  'kettlebell',
 ] as const
 
 export const DIFFICULTY_LEVELS = [
   { id: 'beginner', name: 'Principiante', icon: '🟢' },
   { id: 'intermediate', name: 'Intermedio', icon: '🟡' },
-  { id: 'advanced', name: 'Avanzado', icon: '🔴' }
+  { id: 'advanced', name: 'Avanzado', icon: '🔴' },
 ] as const

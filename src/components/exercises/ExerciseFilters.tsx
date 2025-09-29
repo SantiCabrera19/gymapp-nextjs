@@ -2,7 +2,12 @@
 
 import { Filter, X, Heart, Target } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
-import { type ExerciseFilters, MUSCLE_GROUPS, EQUIPMENT_TYPES, DIFFICULTY_LEVELS } from '@/types/exercises'
+import {
+  type ExerciseFilters,
+  MUSCLE_GROUPS,
+  EQUIPMENT_TYPES,
+  DIFFICULTY_LEVELS,
+} from '@/types/exercises'
 import { cn } from '@/lib/utils'
 
 interface ExerciseFiltersProps {
@@ -13,19 +18,19 @@ interface ExerciseFiltersProps {
   onToggle: () => void
 }
 
-export function ExerciseFilters({ 
-  filters, 
-  onUpdateFilter, 
-  onReset, 
-  isOpen, 
-  onToggle 
+export function ExerciseFilters({
+  filters,
+  onUpdateFilter,
+  onReset,
+  isOpen,
+  onToggle,
 }: ExerciseFiltersProps) {
   const activeFiltersCount = [
     filters.muscleGroups.length,
     filters.equipment.length,
     filters.difficulty.length,
     filters.isFavorite ? 1 : 0,
-    filters.recommendedOnly ? 1 : 0
+    filters.recommendedOnly ? 1 : 0,
   ].reduce((sum, count) => sum + count, 0)
 
   const toggleArrayFilter = (key: 'muscleGroups' | 'equipment' | 'difficulty', value: string) => {
@@ -42,10 +47,7 @@ export function ExerciseFilters({
       <Button
         variant="outline"
         onClick={onToggle}
-        className={cn(
-          "relative",
-          activeFiltersCount > 0 && "border-blue-500 text-blue-400"
-        )}
+        className={cn('relative', activeFiltersCount > 0 && 'border-blue-500 text-blue-400')}
       >
         <Filter size={16} />
         Filtros
@@ -60,11 +62,8 @@ export function ExerciseFilters({
       {isOpen && (
         <>
           {/* Overlay para cerrar */}
-          <div 
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
-            onClick={onToggle}
-          />
-          
+          <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={onToggle} />
+
           {/* Panel de filtros */}
           <div className="absolute top-12 right-0 w-96 z-50">
             <Card className="bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl shadow-black/50">
@@ -81,7 +80,12 @@ export function ExerciseFilters({
                         Limpiar todo
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={onToggle} className="hover:bg-slate-800">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={onToggle}
+                      className="hover:bg-slate-800"
+                    >
                       <X size={16} />
                     </Button>
                   </div>
@@ -96,7 +100,7 @@ export function ExerciseFilters({
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       size="sm"
-                      variant={filters.recommendedOnly ? "default" : "outline"}
+                      variant={filters.recommendedOnly ? 'default' : 'outline'}
                       onClick={() => onUpdateFilter('recommendedOnly', !filters.recommendedOnly)}
                       className="justify-start h-10"
                     >
@@ -105,7 +109,7 @@ export function ExerciseFilters({
                     </Button>
                     <Button
                       size="sm"
-                      variant={filters.isFavorite ? "default" : "outline"}
+                      variant={filters.isFavorite ? 'default' : 'outline'}
                       onClick={() => onUpdateFilter('isFavorite', !filters.isFavorite)}
                       className="justify-start h-10"
                     >
@@ -126,7 +130,7 @@ export function ExerciseFilters({
                       <Button
                         key={group.id}
                         size="sm"
-                        variant={filters.muscleGroups.includes(group.id) ? "default" : "outline"}
+                        variant={filters.muscleGroups.includes(group.id) ? 'default' : 'outline'}
                         onClick={() => toggleArrayFilter('muscleGroups', group.id)}
                         className="justify-start h-10 text-xs"
                       >
@@ -148,7 +152,7 @@ export function ExerciseFilters({
                       <Button
                         key={equipment}
                         size="sm"
-                        variant={filters.equipment.includes(equipment) ? "default" : "outline"}
+                        variant={filters.equipment.includes(equipment) ? 'default' : 'outline'}
                         onClick={() => toggleArrayFilter('equipment', equipment)}
                         className="justify-start capitalize h-10 text-xs"
                       >
@@ -169,7 +173,7 @@ export function ExerciseFilters({
                       <Button
                         key={level.id}
                         size="sm"
-                        variant={filters.difficulty.includes(level.id) ? "default" : "outline"}
+                        variant={filters.difficulty.includes(level.id) ? 'default' : 'outline'}
                         onClick={() => toggleArrayFilter('difficulty', level.id)}
                         className="justify-start h-10"
                       >

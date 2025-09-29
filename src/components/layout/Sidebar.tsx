@@ -6,16 +6,8 @@ import { cn } from '@/lib/utils'
 import { Button, Avatar } from '@/components/ui'
 import { useAuth } from '@/hooks'
 import { WorkoutTimer } from '@/components/workout'
-import { 
-  Home, 
-  Calendar, 
-  Play, 
-  Dumbbell, 
-  TrendingUp, 
-  User, 
-  Settings,
-  X
-} from 'lucide-react'
+import { useTraining } from '@/hooks'
+import { Home, Calendar, Play, Dumbbell, TrendingUp, User, Settings, X } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -43,10 +35,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Mobile sidebar */}
-      <div className={cn(
-        "fixed inset-y-0 z-50 flex w-64 flex-col transition-transform duration-300 ease-in-out lg:hidden",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div
+        className={cn(
+          'fixed inset-y-0 z-50 flex w-64 flex-col transition-transform duration-300 ease-in-out lg:hidden',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
         <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold text-accent-primary">GymApp</h1>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -61,10 +55,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 function SidebarContent({ pathname }: { pathname: string }) {
   const { isAuthenticated, profile } = useAuth()
-  
-  
-  // Training state - TODO: implement real training state
-  const isTraining = false
+
+  // Training state - integrado con useTraining
+  const { activeSession } = useTraining()
+  const isTraining = !!activeSession
 
   return (
     <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background-secondary px-4 pb-4">
@@ -76,29 +70,30 @@ function SidebarContent({ pathname }: { pathname: string }) {
         <h1 className="text-xl font-bold text-accent-primary">GymApp</h1>
       </div>
 
-
       {/* Navigation */}
       <nav className="flex flex-1 flex-col">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => {
+              {navigation.map(item => {
                 const isActive = pathname === item.href
                 return (
                   <li key={item.name}>
                     <Link
                       href={item.href}
                       className={cn(
-                        "group flex items-center gap-x-3 rounded-md p-2 text-sm font-medium leading-6 transition-colors",
+                        'group flex items-center gap-x-3 rounded-md p-2 text-sm font-medium leading-6 transition-colors',
                         isActive
-                          ? "text-white hover:bg-white/10"
-                          : "text-text-secondary hover:bg-white/10 hover:text-text-primary"
+                          ? 'text-white hover:bg-white/10'
+                          : 'text-text-secondary hover:bg-white/10 hover:text-text-primary'
                       )}
                     >
                       <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent ring-0 transition-all duration-150 group-hover:bg-white/10 group-hover:ring-1 group-hover:ring-white/10">
-                        <item.icon className={cn(
-                          "h-5 w-5 shrink-0 transition-colors text-text-tertiary group-hover:text-text-secondary"
-                        )} />
+                        <item.icon
+                          className={cn(
+                            'h-5 w-5 shrink-0 transition-colors text-text-tertiary group-hover:text-text-secondary'
+                          )}
+                        />
                       </span>
                       {item.name}
                     </Link>
@@ -130,8 +125,8 @@ function SidebarContent({ pathname }: { pathname: string }) {
               {isAuthenticated ? (
                 <div className="rounded-lg bg-background-tertiary/50 p-4">
                   <div className="flex items-center gap-3">
-                    <Avatar 
-                      size="sm" 
+                    <Avatar
+                      size="sm"
                       src={profile?.avatar_url || undefined}
                       alt={profile?.full_name || profile?.username || 'Usuario'}
                       fallback={profile?.full_name?.[0] || profile?.username?.[0] || 'U'}
@@ -141,9 +136,14 @@ function SidebarContent({ pathname }: { pathname: string }) {
                         {profile?.full_name || profile?.username || 'Usuario'}
                       </p>
                       <p className="text-xs text-text-tertiary">
-                        Nivel: {profile?.experience_level === 'beginner' ? 'Principiante' : 
-                               profile?.experience_level === 'intermediate' ? 'Intermedio' : 
-                               profile?.experience_level === 'advanced' ? 'Avanzado' : 'Principiante'}
+                        Nivel:{' '}
+                        {profile?.experience_level === 'beginner'
+                          ? 'Principiante'
+                          : profile?.experience_level === 'intermediate'
+                            ? 'Intermedio'
+                            : profile?.experience_level === 'advanced'
+                              ? 'Avanzado'
+                              : 'Principiante'}
                       </p>
                     </div>
                   </div>
@@ -154,20 +154,17 @@ function SidebarContent({ pathname }: { pathname: string }) {
               {!isAuthenticated ? (
                 <div className="space-y-3">
                   <div className="rounded-lg bg-background-tertiary/50 p-4">
-                    <h3 className="text-sm font-medium text-text-primary mb-2">¡Bienvenido a GymApp!</h3>
+                    <h3 className="text-sm font-medium text-text-primary mb-2">
+                      ¡Bienvenido a GymApp!
+                    </h3>
                     <p className="text-xs text-text-secondary mb-3">
                       Inicia sesión para acceder a todas las funcionalidades
                     </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      asChild
-                    >
+                    <Button variant="outline" size="sm" className="w-full" asChild>
                       <Link href="/auth/login">Iniciar Sesión</Link>
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <h4 className="text-xs font-medium text-text-primary">Comenzar</h4>
                     <p className="text-xs text-text-tertiary">

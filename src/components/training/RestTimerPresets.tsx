@@ -18,10 +18,10 @@ export function RestTimerPresets({
   onSelectPreset,
   onStartTimer,
   isTimerRunning,
-  className
+  className,
 }: RestTimerPresetsProps) {
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Header */}
       <div className="flex items-center gap-2">
         <Clock size={18} className="text-orange-400" />
@@ -30,33 +30,31 @@ export function RestTimerPresets({
 
       {/* Presets Grid */}
       <div className="grid grid-cols-3 gap-2">
-        {REST_TIMER_PRESETS.map((preset) => {
+        {REST_TIMER_PRESETS.map(preset => {
           const isSelected = selectedPreset === preset
           const minutes = Math.floor(preset / 60)
           const seconds = preset % 60
-          const label = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${preset}s`
-          
+          const label =
+            minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${preset}s`
+
           return (
             <button
               key={preset}
               onClick={() => onSelectPreset(preset)}
               className={cn(
-                "flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all",
-                "hover:scale-105 active:scale-95",
+                'flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all',
+                'hover:scale-105 active:scale-95',
                 isSelected
-                  ? "bg-orange-500 border-orange-500 text-white shadow-lg"
-                  : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-300"
+                  ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
+                  : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
               )}
             >
-              <div className={cn(
-                "text-lg font-bold",
-                isSelected ? "text-white" : "text-slate-300"
-              )}>
+              <div
+                className={cn('text-lg font-bold', isSelected ? 'text-white' : 'text-slate-300')}
+              >
                 {label}
               </div>
-              <div className="text-xs opacity-75">
-                {preset < 60 ? 'segundos' : 'minutos'}
-              </div>
+              <div className="text-xs opacity-75">{preset < 60 ? 'segundos' : 'minutos'}</div>
             </button>
           )
         })}
@@ -72,7 +70,7 @@ export function RestTimerPresets({
           <Clock size={16} className="mr-2" />
           Iniciar {formatDuration(selectedPreset)}
         </Button>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -86,17 +84,17 @@ export function RestTimerPresets({
       {/* Presets rápidos adicionales */}
       <div className="flex gap-2 pt-2 border-t border-slate-700/50">
         <span className="text-xs text-slate-500 flex-shrink-0 self-center">Rápido:</span>
-        {[30, 60, 90].map((seconds) => (
+        {[30, 60, 90].map(seconds => (
           <button
             key={seconds}
             onClick={() => onStartTimer(seconds)}
             disabled={isTimerRunning}
             className={cn(
-              "flex-1 py-2 px-3 text-xs rounded-md transition-all",
-              "bg-slate-800/50 border border-slate-700/50 text-slate-400",
-              "hover:border-slate-600 hover:text-slate-300 hover:bg-slate-800",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              !isTimerRunning && "active:scale-95"
+              'flex-1 py-2 px-3 text-xs rounded-md transition-all',
+              'bg-slate-800/50 border border-slate-700/50 text-slate-400',
+              'hover:border-slate-600 hover:text-slate-300 hover:bg-slate-800',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              !isTimerRunning && 'active:scale-95'
             )}
           >
             {seconds}s

@@ -12,15 +12,8 @@ import { Card } from '@/components/ui'
 import { Toast, useToast } from '@/components/ui/Toast'
 
 export function ProfileForm() {
-  const {
-    formData,
-    errors,
-    isLoading,
-    isDirty,
-    updateField,
-    handleSave,
-    resetForm
-  } = useProfileForm()
+  const { formData, errors, isLoading, isDirty, updateField, handleSave, resetForm } =
+    useProfileForm()
 
   const { toast, hideToast } = useToast()
   const { updateProfile } = useAuth()
@@ -29,7 +22,7 @@ export function ProfileForm() {
   return (
     <div className="space-y-6">
       {/* Avatar Section - Always visible */}
-      <AvatarSection 
+      <AvatarSection
         avatar={formData.avatar_url || undefined}
         name={formData.full_name || undefined}
         onAvatarChange={(url: string | null) => {

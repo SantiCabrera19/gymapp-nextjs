@@ -23,18 +23,18 @@ export function SetInputForm({
   onSubmit,
   onStartRest,
   loading = false,
-  className
+  className,
 }: SetInputFormProps) {
   const { lastPerformance, bestPerformance, hasHistory } = useExerciseHistory(exerciseId)
-  
+
   const [formData, setFormData] = useState<SetFormData>({
     weight_kg: '',
     reps_completed: '',
     set_type: SET_TYPES.NORMAL,
     rpe_score: undefined,
-    notes: ''
+    notes: '',
   })
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Pre-llenar con último peso si existe
@@ -46,46 +46,45 @@ export function SetInputForm({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-    
+
     if (!formData.weight_kg || formData.weight_kg <= 0) {
       newErrors.weight_kg = 'El peso debe ser mayor a 0'
     }
-    
+
     if (!formData.reps_completed || formData.reps_completed <= 0) {
       newErrors.reps_completed = 'Las repeticiones deben ser mayor a 0'
     }
-    
+
     if (formData.rpe_score && (formData.rpe_score < 1 || formData.rpe_score > 10)) {
       newErrors.rpe_score = 'RPE debe estar entre 1 y 10'
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
-    
+
     try {
       await onSubmit({
         ...formData,
         weight_kg: Number(formData.weight_kg),
-        reps_completed: Number(formData.reps_completed)
+        reps_completed: Number(formData.reps_completed),
       })
-      
+
       // Limpiar solo reps y notas, mantener peso y tipo
       setFormData(prev => ({
         ...prev,
         reps_completed: '',
         notes: '',
-        rpe_score: undefined
+        rpe_score: undefined,
       }))
-      
+
       // Iniciar timer de descanso automáticamente
       onStartRest()
-      
     } catch (error) {
       console.error('Error adding set:', error)
     }
@@ -98,7 +97,7 @@ export function SetInputForm({
   }
 
   return (
-    <Card className={cn("p-6", className)}>
+    <Card className={cn('p-6', className)}>
       <div className="space-y-6">
         {/* Header con ejercicio */}
         <div className="text-center">
@@ -108,13 +107,17 @@ export function SetInputForm({
               {lastPerformance && (
                 <div className="flex items-center gap-1">
                   <Calendar size={14} />
-                  <span>Último: {lastPerformance.weight}kg × {lastPerformance.reps}</span>
+                  <span>
+                    Último: {lastPerformance.weight}kg × {lastPerformance.reps}
+                  </span>
                 </div>
               )}
               {bestPerformance && (
                 <div className="flex items-center gap-1">
                   <TrendingUp size={14} />
-                  <span>Mejor: {bestPerformance.weight}kg × {bestPerformance.reps}</span>
+                  <span>
+                    Mejor: {bestPerformance.weight}kg × {bestPerformance.reps}
+                  </span>
                 </div>
               )}
             </div>
@@ -126,48 +129,54 @@ export function SetInputForm({
           <div className="grid grid-cols-2 gap-4">
             {/* Peso */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">
-                Peso (kg)
-              </label>
+              <label className="text-sm font-medium text-slate-300">Peso (kg)</label>
               <input
                 type="number"
                 step="0.5"
                 min="0"
                 value={formData.weight_kg}
-                onChange={(e) => setFormData(prev => ({ ...prev, weight_kg: e.target.value ? Number(e.target.value) : '' }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    weight_kg: e.target.value ? Number(e.target.value) : '',
+                  }))
+                }
                 onKeyPress={handleKeyPress}
                 className={cn(
-                  "w-full h-14 px-4 text-xl font-semibold text-center rounded-lg",
-                  "bg-slate-800 border-2 text-white placeholder-slate-500",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                  "transition-all duration-200",
-                  errors.weight_kg ? "border-red-500" : "border-slate-700 hover:border-slate-600"
+                  'w-full h-14 px-4 text-xl font-semibold text-center rounded-lg',
+                  'bg-slate-800 border-2 text-white placeholder-slate-500',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  'transition-all duration-200',
+                  errors.weight_kg ? 'border-red-500' : 'border-slate-700 hover:border-slate-600'
                 )}
                 placeholder="0"
                 disabled={loading}
               />
-              {errors.weight_kg && (
-                <p className="text-xs text-red-400">{errors.weight_kg}</p>
-              )}
+              {errors.weight_kg && <p className="text-xs text-red-400">{errors.weight_kg}</p>}
             </div>
 
             {/* Repeticiones */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">
-                Repeticiones
-              </label>
+              <label className="text-sm font-medium text-slate-300">Repeticiones</label>
               <input
                 type="number"
                 min="1"
                 value={formData.reps_completed}
-                onChange={(e) => setFormData(prev => ({ ...prev, reps_completed: e.target.value ? Number(e.target.value) : '' }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    reps_completed: e.target.value ? Number(e.target.value) : '',
+                  }))
+                }
                 onKeyPress={handleKeyPress}
                 className={cn(
-                  "w-full h-14 px-4 text-xl font-semibold text-center rounded-lg",
-                  "bg-slate-800 border-2 text-white placeholder-slate-500",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                  "transition-all duration-200",
-                  errors.reps_completed ? "border-red-500" : "border-slate-700 hover:border-slate-600"
+                  'w-full h-14 px-4 text-xl font-semibold text-center rounded-lg',
+                  'bg-slate-800 border-2 text-white placeholder-slate-500',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  'transition-all duration-200',
+                  errors.reps_completed
+                    ? 'border-red-500'
+                    : 'border-slate-700 hover:border-slate-600'
                 )}
                 placeholder="0"
                 disabled={loading}
@@ -180,55 +189,52 @@ export function SetInputForm({
 
           {/* Tipo de serie */}
           <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-300">
-              Tipo de Serie
-            </label>
+            <label className="text-sm font-medium text-slate-300">Tipo de Serie</label>
             <SetTypeSelector
               value={formData.set_type}
-              onChange={(type) => setFormData(prev => ({ ...prev, set_type: type }))}
+              onChange={type => setFormData(prev => ({ ...prev, set_type: type }))}
             />
           </div>
 
           {/* RPE (opcional) */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">
-              RPE (1-10) - Opcional
-            </label>
+            <label className="text-sm font-medium text-slate-300">RPE (1-10) - Opcional</label>
             <input
               type="number"
               min="1"
               max="10"
               value={formData.rpe_score || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, rpe_score: e.target.value ? Number(e.target.value) : undefined }))}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  rpe_score: e.target.value ? Number(e.target.value) : undefined,
+                }))
+              }
               className={cn(
-                "w-full h-12 px-4 text-lg text-center rounded-lg",
-                "bg-slate-800 border-2 text-white placeholder-slate-500",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                "transition-all duration-200",
-                errors.rpe_score ? "border-red-500" : "border-slate-700 hover:border-slate-600"
+                'w-full h-12 px-4 text-lg text-center rounded-lg',
+                'bg-slate-800 border-2 text-white placeholder-slate-500',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'transition-all duration-200',
+                errors.rpe_score ? 'border-red-500' : 'border-slate-700 hover:border-slate-600'
               )}
               placeholder="Esfuerzo percibido"
               disabled={loading}
             />
-            {errors.rpe_score && (
-              <p className="text-xs text-red-400">{errors.rpe_score}</p>
-            )}
+            {errors.rpe_score && <p className="text-xs text-red-400">{errors.rpe_score}</p>}
           </div>
 
           {/* Notas (opcional) */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">
-              Notas - Opcional
-            </label>
+            <label className="text-sm font-medium text-slate-300">Notas - Opcional</label>
             <textarea
               value={formData.notes || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={2}
               className={cn(
-                "w-full px-4 py-3 rounded-lg resize-none",
-                "bg-slate-800 border-2 border-slate-700 text-white placeholder-slate-500",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                "hover:border-slate-600 transition-all duration-200"
+                'w-full px-4 py-3 rounded-lg resize-none',
+                'bg-slate-800 border-2 border-slate-700 text-white placeholder-slate-500',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'hover:border-slate-600 transition-all duration-200'
               )}
               placeholder="Observaciones sobre la serie..."
               disabled={loading}

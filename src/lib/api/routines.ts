@@ -43,7 +43,8 @@ export interface RoutineExercise {
 export async function getUserRoutines(userId: string): Promise<Routine[]> {
   const { data, error } = await supabase
     .from('routines')
-    .select(`
+    .select(
+      `
       *,
       routine_exercises (
         *,
@@ -55,7 +56,8 @@ export async function getUserRoutines(userId: string): Promise<Routine[]> {
           image_url
         )
       )
-    `)
+    `
+    )
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
@@ -66,7 +68,8 @@ export async function getUserRoutines(userId: string): Promise<Routine[]> {
 export async function getRoutineById(routineId: string, userId: string): Promise<Routine | null> {
   const { data, error } = await supabase
     .from('routines')
-    .select(`
+    .select(
+      `
       *,
       routine_exercises (
         *,
@@ -80,7 +83,8 @@ export async function getRoutineById(routineId: string, userId: string): Promise
           equipment_needed
         )
       )
-    `)
+    `
+    )
     .eq('id', routineId)
     .eq('user_id', userId)
     .single()
@@ -99,7 +103,7 @@ export async function createRoutine(userId: string, routineData: RoutineData): P
       description: routineData.description,
       difficulty_level: routineData.difficulty_level,
       estimated_duration_minutes: routineData.estimated_duration_minutes,
-      is_active: true
+      is_active: true,
     })
     .select()
     .single()
@@ -115,7 +119,7 @@ export async function createRoutine(userId: string, routineData: RoutineData): P
       sets: exercise.sets || 3,
       reps: exercise.reps || 10,
       rest_seconds: exercise.rest_seconds || 60,
-      notes: exercise.notes
+      notes: exercise.notes,
     }))
 
     const { error: exercisesError } = await supabase
@@ -130,8 +134,8 @@ export async function createRoutine(userId: string, routineData: RoutineData): P
 }
 
 export async function updateRoutine(
-  routineId: string, 
-  userId: string, 
+  routineId: string,
+  userId: string,
   updates: Partial<RoutineData>
 ): Promise<Routine> {
   // 1. Actualizar información básica
@@ -142,7 +146,7 @@ export async function updateRoutine(
       description: updates.description,
       difficulty_level: updates.difficulty_level,
       estimated_duration_minutes: updates.estimated_duration_minutes,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('id', routineId)
     .eq('user_id', userId)
@@ -168,7 +172,7 @@ export async function updateRoutine(
         sets: exercise.sets || 3,
         reps: exercise.reps || 10,
         rest_seconds: exercise.rest_seconds || 60,
-        notes: exercise.notes
+        notes: exercise.notes,
       }))
 
       const { error: insertError } = await supabase
@@ -193,7 +197,11 @@ export async function deleteRoutine(routineId: string, userId: string): Promise<
   if (error) throw error
 }
 
-export async function duplicateRoutine(routineId: string, userId: string, newName?: string): Promise<Routine> {
+export async function duplicateRoutine(
+  routineId: string,
+  userId: string,
+  newName?: string
+): Promise<Routine> {
   // 1. Obtener rutina original
   const originalRoutine = await getRoutineById(routineId, userId)
   if (!originalRoutine) throw new Error('Rutina no encontrada')
@@ -204,14 +212,15 @@ export async function duplicateRoutine(routineId: string, userId: string, newNam
     description: originalRoutine.description,
     difficulty_level: originalRoutine.difficulty_level,
     estimated_duration_minutes: originalRoutine.estimated_duration_minutes,
-    exercises: originalRoutine.routine_exercises?.map(re => ({
-      ...re.exercise!,
-      order: re.order,
-      sets: re.sets,
-      reps: re.reps,
-      rest_seconds: re.rest_seconds,
-      notes: re.notes
-    })) || []
+    exercises:
+      originalRoutine.routine_exercises?.map(re => ({
+        ...re.exercise!,
+        order: re.order,
+        sets: re.sets,
+        reps: re.reps,
+        rest_seconds: re.rest_seconds,
+        notes: re.notes,
+      })) || [],
   }
 
   return createRoutine(userId, routineData)
@@ -226,7 +235,8 @@ export async function getPopularRoutines(limit: number = 10): Promise<Routine[]>
   // Por ahora, retorna rutinas públicas más recientes
   const { data, error } = await supabase
     .from('routines')
-    .select(`
+    .select(
+      `
       *,
       routine_exercises (
         *,
@@ -238,7 +248,8 @@ export async function getPopularRoutines(limit: number = 10): Promise<Routine[]>
           image_url
         )
       )
-    `)
+    `
+    )
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(limit)
@@ -250,7 +261,8 @@ export async function getPopularRoutines(limit: number = 10): Promise<Routine[]>
 export async function searchRoutines(query: string, userId?: string): Promise<Routine[]> {
   let queryBuilder = supabase
     .from('routines')
-    .select(`
+    .select(
+      `
       *,
       routine_exercises (
         *,
@@ -262,7 +274,8 @@ export async function searchRoutines(query: string, userId?: string): Promise<Ro
           image_url
         )
       )
-    `)
+    `
+    )
     .eq('is_active', true)
     .ilike('name', `%${query}%`)
     .limit(20)

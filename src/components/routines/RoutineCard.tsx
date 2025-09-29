@@ -22,16 +22,22 @@ export function RoutineCard({
   onEdit,
   onDuplicate,
   onDelete,
-  compact = false
+  compact = false,
 }: RoutineCardProps) {
   const router = useRouter()
   const [showActions, setShowActions] = useState(false)
 
   const exerciseCount = routine.exercises?.length || 0
   const difficultyConfig = {
-    beginner: { label: 'Principiante', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
-    intermediate: { label: 'Intermedio', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-    advanced: { label: 'Avanzado', color: 'bg-red-500/20 text-red-400 border-red-500/30' }
+    beginner: {
+      label: 'Principiante',
+      color: 'bg-green-500/20 text-green-400 border-green-500/30',
+    },
+    intermediate: {
+      label: 'Intermedio',
+      color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    },
+    advanced: { label: 'Avanzado', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
   }
 
   const difficulty = difficultyConfig[routine.difficulty_level] || difficultyConfig.beginner
@@ -70,29 +76,28 @@ export function RoutineCard({
   }
 
   return (
-    <Card 
+    <Card
       className={cn(
-        "group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1",
-        "border-border-primary hover:border-accent-primary/50",
-        compact ? "p-4" : "p-6"
+        'group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1',
+        'border-border-primary hover:border-accent-primary/50',
+        compact ? 'p-4' : 'p-6'
       )}
       onClick={handleCardClick}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
-          <h3 className={cn(
-            "font-semibold text-white truncate",
-            compact ? "text-lg" : "text-xl"
-          )}>
+          <h3 className={cn('font-semibold text-white truncate', compact ? 'text-lg' : 'text-xl')}>
             {routine.name}
           </h3>
-          
+
           {routine.description && (
-            <p className={cn(
-              "text-text-secondary mt-1",
-              compact ? "text-sm line-clamp-2" : "text-base line-clamp-3"
-            )}>
+            <p
+              className={cn(
+                'text-text-secondary mt-1',
+                compact ? 'text-sm line-clamp-2' : 'text-base line-clamp-3'
+              )}
+            >
               {routine.description}
             </p>
           )}
@@ -103,7 +108,7 @@ export function RoutineCard({
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               setShowActions(!showActions)
             }}
@@ -144,16 +149,15 @@ export function RoutineCard({
 
       {/* Metadata */}
       <div className="flex items-center gap-4 mb-4">
-        <div className={cn(
-          "px-2 py-1 rounded-full text-xs font-medium border",
-          difficulty.color
-        )}>
+        <div className={cn('px-2 py-1 rounded-full text-xs font-medium border', difficulty.color)}>
           {difficulty.label}
         </div>
 
         <div className="flex items-center gap-1 text-text-secondary text-sm">
           <Dumbbell size={14} />
-          <span>{exerciseCount} ejercicio{exerciseCount !== 1 ? 's' : ''}</span>
+          <span>
+            {exerciseCount} ejercicio{exerciseCount !== 1 ? 's' : ''}
+          </span>
         </div>
 
         <div className="flex items-center gap-1 text-text-secondary text-sm">
@@ -192,13 +196,8 @@ export function RoutineCard({
           <Play size={14} className="mr-2" />
           Entrenar
         </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleEdit}
-          className="hover:bg-background-card"
-        >
+
+        <Button variant="ghost" size="sm" onClick={handleEdit} className="hover:bg-background-card">
           <Edit size={14} />
         </Button>
       </div>

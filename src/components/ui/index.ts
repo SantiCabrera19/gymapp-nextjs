@@ -3,7 +3,15 @@ export { Button } from './Button'
 export { Input, inputVariants } from './Input'
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card'
 export { Avatar } from './Avatar'
-export { Skeleton, ProfileSkeleton, HeaderProfileSkeleton, DashboardSkeleton, NavItemSkeleton, PageSkeleton, ProfilePageSkeleton } from './Skeleton'
+export {
+  Skeleton,
+  ProfileSkeleton,
+  HeaderProfileSkeleton,
+  DashboardSkeleton,
+  NavItemSkeleton,
+  PageSkeleton,
+  ProfilePageSkeleton,
+} from './Skeleton'
 export { Breadcrumbs } from './Breadcrumbs'
 export { Toast, useToast } from './Toast'
 export { ModernRadio, ModernRadioGroup } from './ModernRadio'

@@ -19,16 +19,14 @@ export function ExerciseTechnique({ instructions, tips, commonMistakes }: Exerci
             <BookOpen className="text-blue-400" size={20} />
             Técnica Correcta
           </h3>
-          
+
           <div className="space-y-3">
             {instructions.map((instruction, index) => (
               <div key={index} className="flex gap-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
                   {index + 1}
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed">
-                  {instruction}
-                </p>
+                <p className="text-sm text-slate-300 leading-relaxed">{instruction}</p>
               </div>
             ))}
           </div>
@@ -42,14 +40,12 @@ export function ExerciseTechnique({ instructions, tips, commonMistakes }: Exerci
             <Lightbulb className="text-yellow-400" size={20} />
             Tips Profesionales
           </h3>
-          
+
           <div className="space-y-3">
             {tips.map((tip, index) => (
               <div key={index} className="flex gap-3">
                 <CheckCircle className="flex-shrink-0 text-green-400 mt-0.5" size={16} />
-                <p className="text-sm text-slate-300 leading-relaxed">
-                  {tip}
-                </p>
+                <p className="text-sm text-slate-300 leading-relaxed">{tip}</p>
               </div>
             ))}
           </div>
@@ -63,14 +59,12 @@ export function ExerciseTechnique({ instructions, tips, commonMistakes }: Exerci
             <AlertTriangle className="text-red-400" size={20} />
             Errores Comunes
           </h3>
-          
+
           <div className="space-y-3">
             {commonMistakes.map((mistake, index) => (
               <div key={index} className="flex gap-3">
                 <AlertTriangle className="flex-shrink-0 text-red-400 mt-0.5" size={16} />
-                <p className="text-sm text-slate-300 leading-relaxed">
-                  {mistake}
-                </p>
+                <p className="text-sm text-slate-300 leading-relaxed">{mistake}</p>
               </div>
             ))}
           </div>
@@ -85,8 +79,8 @@ export function ExerciseTechnique({ instructions, tips, commonMistakes }: Exerci
             Consejo del Entrenador
           </h4>
           <p className="text-sm text-slate-300 leading-relaxed">
-            La consistencia en la técnica es más importante que el peso utilizado. 
-            Enfócate en la calidad del movimiento antes de aumentar la carga.
+            La consistencia en la técnica es más importante que el peso utilizado. Enfócate en la
+            calidad del movimiento antes de aumentar la carga.
           </p>
         </div>
       </Card>

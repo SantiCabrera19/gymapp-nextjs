@@ -19,13 +19,15 @@ export function PersonalInfoSection({
   isActive,
   onFocus,
   onBlur,
-  onChange
+  onChange,
 }: PersonalInfoSectionProps) {
   return (
-    <Card className={cn(
-      "transition-all duration-200",
-      isActive && "ring-2 ring-accent-primary/50 shadow-lg"
-    )}>
+    <Card
+      className={cn(
+        'transition-all duration-200',
+        isActive && 'ring-2 ring-accent-primary/50 shadow-lg'
+      )}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5 text-accent-primary" />
@@ -39,7 +41,7 @@ export function PersonalInfoSection({
             label="Nombre completo"
             placeholder="Tu nombre completo"
             value={data.full_name || ''}
-            onChange={(e) => onChange('full_name', e.target.value)}
+            onChange={e => onChange('full_name', e.target.value)}
             onFocus={onFocus}
             onBlur={onBlur}
             error={errors.full_name}
@@ -54,7 +56,9 @@ export function PersonalInfoSection({
             label="Nombre de usuario"
             placeholder="usuario_unico"
             value={data.username || ''}
-            onChange={(e) => onChange('username', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+            onChange={e =>
+              onChange('username', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
+            }
             onFocus={onFocus}
             onBlur={onBlur}
             error={errors.username}
@@ -65,28 +69,19 @@ export function PersonalInfoSection({
 
         {/* Email (readonly) */}
         <div className="relative">
-          <Input
-            label="Email"
-            value={data.email || ''}
-            disabled
-            className="pl-10 opacity-60"
-          />
+          <Input label="Email" value={data.email || ''} disabled className="pl-10 opacity-60" />
           <Mail className="absolute left-3 top-[38px] h-4 w-4 text-text-tertiary" />
-          <div className="text-xs text-text-tertiary mt-1">
-            El email no se puede cambiar
-          </div>
+          <div className="text-xs text-text-tertiary mt-1">El email no se puede cambiar</div>
         </div>
 
         {/* Bio */}
         <div className="relative">
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Biografía
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Biografía</label>
           <div className="relative">
             <textarea
               placeholder="Cuéntanos sobre ti y tus objetivos fitness..."
               value={data.bio || ''}
-              onChange={(e) => onChange('bio', e.target.value)}
+              onChange={e => onChange('bio', e.target.value)}
               onFocus={onFocus}
               onBlur={onBlur}
               rows={3}

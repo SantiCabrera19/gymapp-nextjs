@@ -75,12 +75,12 @@ export function ExerciseTimer({ isActive, onTimeUpdate, className }: ExerciseTim
   const getTimerColor = () => {
     if (!isRunning) return 'text-text-secondary'
     if (seconds < 60) return 'text-green-400'
-    if (seconds < 300) return 'text-yellow-400' 
+    if (seconds < 300) return 'text-yellow-400'
     return 'text-red-400'
   }
 
   return (
-    <Card className={cn("p-4", className)}>
+    <Card className={cn('p-4', className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-background-card rounded-full flex items-center justify-center">
@@ -88,10 +88,7 @@ export function ExerciseTimer({ isActive, onTimeUpdate, className }: ExerciseTim
           </div>
           <div>
             <div className="text-sm text-text-secondary">Tiempo de ejercicio</div>
-            <div className={cn(
-              "text-2xl font-mono font-bold transition-colors",
-              getTimerColor()
-            )}>
+            <div className={cn('text-2xl font-mono font-bold transition-colors', getTimerColor())}>
               {formatTime(seconds)}
             </div>
           </div>
@@ -99,12 +96,12 @@ export function ExerciseTimer({ isActive, onTimeUpdate, className }: ExerciseTim
 
         <div className="flex items-center gap-2">
           {/* Indicador de estado */}
-          <div className={cn(
-            "w-3 h-3 rounded-full transition-all",
-            isRunning 
-              ? "bg-green-400 animate-pulse" 
-              : "bg-text-tertiary"
-          )} />
+          <div
+            className={cn(
+              'w-3 h-3 rounded-full transition-all',
+              isRunning ? 'bg-green-400 animate-pulse' : 'bg-text-tertiary'
+            )}
+          />
 
           {/* Controles */}
           <div className="flex gap-1">
@@ -116,7 +113,7 @@ export function ExerciseTimer({ isActive, onTimeUpdate, className }: ExerciseTim
             >
               {isRunning ? <Pause size={16} /> : <Play size={16} />}
             </Button>
-            
+
             <Button
               variant="ghost"
               size="icon-sm"
@@ -131,13 +128,13 @@ export function ExerciseTimer({ isActive, onTimeUpdate, className }: ExerciseTim
 
       {/* Barra de progreso visual */}
       <div className="mt-3 w-full bg-background-tertiary rounded-full h-1 overflow-hidden">
-        <div 
+        <div
           className={cn(
-            "h-full transition-all duration-1000 ease-linear",
-            isRunning ? "bg-accent-primary" : "bg-text-tertiary"
+            'h-full transition-all duration-1000 ease-linear',
+            isRunning ? 'bg-accent-primary' : 'bg-text-tertiary'
           )}
           style={{
-            width: isRunning ? `${Math.min((seconds % 60) * (100/60), 100)}%` : '0%'
+            width: isRunning ? `${Math.min((seconds % 60) * (100 / 60), 100)}%` : '0%',
           }}
         />
       </div>
@@ -145,12 +142,8 @@ export function ExerciseTimer({ isActive, onTimeUpdate, className }: ExerciseTim
       {/* Stats rápidas */}
       {seconds > 0 && (
         <div className="mt-2 flex justify-between text-xs text-text-tertiary">
-          <span>
-            {startTime && `Iniciado: ${new Date(startTime).toLocaleTimeString()}`}
-          </span>
-          <span>
-            {Math.floor(seconds / 60)} min transcurridos
-          </span>
+          <span>{startTime && `Iniciado: ${new Date(startTime).toLocaleTimeString()}`}</span>
+          <span>{Math.floor(seconds / 60)} min transcurridos</span>
         </div>
       )}
     </Card>
@@ -179,6 +172,6 @@ export function useExerciseTimer() {
     totalWorkoutTime,
     handleExerciseTimeUpdate,
     resetExerciseTimer,
-    addToTotalTime
+    addToTotalTime,
   }
 }

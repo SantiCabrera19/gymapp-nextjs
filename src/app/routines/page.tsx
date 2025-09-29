@@ -18,7 +18,7 @@ export default function RoutinesPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
   const { requireAuth } = useAuthAction()
-  
+
   const {
     routines,
     filters,
@@ -30,7 +30,7 @@ export default function RoutinesPage() {
     resetFilters,
     handleDuplicateRoutine,
     handleDeleteRoutine,
-    clearError
+    clearError,
   } = useRoutines()
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -86,11 +86,11 @@ export default function RoutinesPage() {
     return (
       <AppLayout>
         <div className="flex-1 space-y-6 p-6">
-          <Breadcrumbs 
+          <Breadcrumbs
             items={[
               { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Rutinas', href: '/routines', current: true }
-            ]} 
+              { label: 'Rutinas', href: '/routines', current: true },
+            ]}
           />
 
           <EmptyState
@@ -98,8 +98,8 @@ export default function RoutinesPage() {
             title="Inicia Sesión para Ver Rutinas"
             description="Necesitas estar autenticado para crear y gestionar tus rutinas de entrenamiento personalizadas."
             action={{
-              label: "Iniciar Sesión",
-              onClick: () => requireAuth(() => {})
+              label: 'Iniciar Sesión',
+              onClick: () => requireAuth(() => {}),
             }}
           />
         </div>
@@ -111,19 +111,17 @@ export default function RoutinesPage() {
     <AppLayout>
       <div className="flex-1 space-y-6 p-6">
         {/* Breadcrumbs */}
-        <Breadcrumbs 
+        <Breadcrumbs
           items={[
             { label: 'Dashboard', href: '/dashboard' },
-            { label: 'Rutinas', href: '/routines', current: true }
-          ]} 
+            { label: 'Rutinas', href: '/routines', current: true },
+          ]}
         />
 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-white">
-              Mis Rutinas
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight text-white">Mis Rutinas</h1>
             <p className="text-text-secondary">
               Crea y gestiona tus rutinas de entrenamiento personalizadas
             </p>
@@ -168,7 +166,9 @@ export default function RoutinesPage() {
                   <Target size={20} className="text-yellow-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-white">{stats.byDifficulty.intermediate}</div>
+                  <div className="text-2xl font-bold text-white">
+                    {stats.byDifficulty.intermediate}
+                  </div>
                   <div className="text-sm text-text-secondary">Intermedio</div>
                 </div>
               </div>
@@ -202,7 +202,8 @@ export default function RoutinesPage() {
         {!loading && routines.length > 0 && (
           <div className="flex items-center justify-between">
             <div className="text-sm text-text-secondary">
-              {routines.length} rutina{routines.length !== 1 ? 's' : ''} encontrada{routines.length !== 1 ? 's' : ''}
+              {routines.length} rutina{routines.length !== 1 ? 's' : ''} encontrada
+              {routines.length !== 1 ? 's' : ''}
             </div>
 
             <div className="flex border border-border-primary rounded-lg overflow-hidden">
@@ -245,12 +246,12 @@ export default function RoutinesPage() {
 
         {/* Loading State */}
         {loading && (
-          <div className={cn(
-            "grid gap-6",
-            viewMode === 'grid' 
-              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-              : "grid-cols-1"
-          )}>
+          <div
+            className={cn(
+              'grid gap-6',
+              viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+            )}
+          >
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-64 bg-background-tertiary rounded-lg animate-pulse" />
             ))}
@@ -264,21 +265,21 @@ export default function RoutinesPage() {
             title="No tienes rutinas creadas"
             description="Crea tu primera rutina para organizar tus entrenamientos y hacer seguimiento de tu progreso de forma estructurada."
             action={{
-              label: "Crear Primera Rutina",
-              onClick: handleCreateRoutine
+              label: 'Crear Primera Rutina',
+              onClick: handleCreateRoutine,
             }}
           />
         )}
 
         {/* Routines Grid/List */}
         {!loading && routines.length > 0 && (
-          <div className={cn(
-            "grid gap-6",
-            viewMode === 'grid' 
-              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-              : "grid-cols-1"
-          )}>
-            {routines.map((routine) => (
+          <div
+            className={cn(
+              'grid gap-6',
+              viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+            )}
+          >
+            {routines.map(routine => (
               <RoutineCard
                 key={routine.id}
                 routine={routine}

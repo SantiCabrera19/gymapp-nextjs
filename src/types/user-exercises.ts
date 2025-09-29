@@ -6,20 +6,20 @@ import type { Tables } from './database'
 
 export const RECORD_TYPES = {
   MAX_WEIGHT: 'max_weight',
-  MAX_REPS: 'max_reps', 
+  MAX_REPS: 'max_reps',
   BEST_VOLUME: 'best_volume',
-  ONE_RM: 'one_rm'
+  ONE_RM: 'one_rm',
 } as const
 
-export type RecordType = typeof RECORD_TYPES[keyof typeof RECORD_TYPES]
+export type RecordType = (typeof RECORD_TYPES)[keyof typeof RECORD_TYPES]
 
 export const PROGRESS_TRENDS = {
   IMPROVING: 'improving',
   STABLE: 'stable',
-  DECLINING: 'declining'
+  DECLINING: 'declining',
 } as const
 
-export type ProgressTrend = typeof PROGRESS_TRENDS[keyof typeof PROGRESS_TRENDS]
+export type ProgressTrend = (typeof PROGRESS_TRENDS)[keyof typeof PROGRESS_TRENDS]
 
 // =====================================================
 // TIPOS BASE DESDE DATABASE (CON VALIDACIONES)
@@ -128,12 +128,9 @@ export function validateRecordType(type: string): RecordType {
   throw new Error(`Invalid record type: ${type}. Must be one of: ${validTypes.join(', ')}`)
 }
 
-export function calculateProgressTrend(
-  currentValue: number, 
-  previousValue: number
-): ProgressTrend {
+export function calculateProgressTrend(currentValue: number, previousValue: number): ProgressTrend {
   const changePercent = ((currentValue - previousValue) / previousValue) * 100
-  
+
   if (changePercent > 5) return PROGRESS_TRENDS.IMPROVING
   if (changePercent < -5) return PROGRESS_TRENDS.DECLINING
   return PROGRESS_TRENDS.STABLE
@@ -154,7 +151,7 @@ export function transformRecordFromDB(record: UserExerciseRecordRow): ExerciseRe
     secondary_value: record.secondary_value || undefined,
     achieved_at: record.achieved_at,
     workout_session_id: record.workout_session_id || undefined,
-    created_at: record.created_at
+    created_at: record.created_at,
   }
 }
 
@@ -177,7 +174,7 @@ export function transformStatsFromDB(stats: UserExerciseStatsRow): ExerciseStats
     last_performed_at: stats.last_performed_at || undefined,
     first_performed_at: stats.first_performed_at || undefined,
     created_at: stats.created_at,
-    updated_at: stats.updated_at
+    updated_at: stats.updated_at,
   }
 }
 
@@ -190,17 +187,17 @@ export function transformFavoriteFromDB(favorite: UserExerciseFavoriteRow): Exer
     id: favorite.id,
     user_id: favorite.user_id,
     exercise_id: favorite.exercise_id,
-    created_at: favorite.created_at
+    created_at: favorite.created_at,
   }
 }
 
 // Convertir ExerciseStats a ExerciseUserStats (para compatibilidad)
 export function statsToUserStats(
-  stats: ExerciseStats, 
+  stats: ExerciseStats,
   previousStats?: ExerciseStats
 ): ExerciseUserStats {
   let progressTrend: ProgressTrend = PROGRESS_TRENDS.STABLE
-  
+
   if (previousStats && stats.total_volume_kg > 0 && previousStats.total_volume_kg > 0) {
     progressTrend = calculateProgressTrend(stats.total_volume_kg, previousStats.total_volume_kg)
   }
@@ -210,7 +207,7 @@ export function statsToUserStats(
     best_weight: stats.best_weight_kg,
     best_reps: stats.best_reps,
     total_sessions: stats.total_sessions,
-    progress_trend: progressTrend
+    progress_trend: progressTrend,
   }
 }
 

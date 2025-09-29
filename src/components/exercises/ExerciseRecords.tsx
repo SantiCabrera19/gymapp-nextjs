@@ -4,6 +4,7 @@ import { Award, TrendingUp, Zap, Target, Dumbbell } from 'lucide-react'
 import { Card } from '@/components/ui'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuthAction } from '@/hooks/useRequireAuth'
+import { useExerciseRecords } from '@/hooks'
 
 interface ExerciseRecordsProps {
   exerciseId: string
@@ -11,15 +12,10 @@ interface ExerciseRecordsProps {
 
 export function ExerciseRecords({ exerciseId }: ExerciseRecordsProps) {
   const { requireAuth, isAuthenticated } = useAuthAction()
-  
-  // TODO: Fetch real data from API
-  const hasData = false // Cambiar cuando tengamos datos reales
-  const records = hasData ? {
-    maxWeight: { value: 85, unit: 'kg', date: '15 Ago 2024' },
-    oneRM: { value: 92, unit: 'kg', date: 'Calculado' },
-    bestVolumeSeries: { weight: 55, reps: 8, date: '10 Ago 2024' },
-    totalVolume: { value: 1950, unit: 'kg', date: 'Este mes' }
-  } : null
+
+  // Usar hook real para obtener records
+  const { records: exerciseRecords, loading, error } = useExerciseRecords(exerciseId)
+  const hasData = exerciseRecords && Object.keys(exerciseRecords).length > 0
 
   return (
     <Card className="p-6">
@@ -35,9 +31,24 @@ export function ExerciseRecords({ exerciseId }: ExerciseRecordsProps) {
             title="Inicia Sesión para Ver Records"
             description="Necesitas estar autenticado para ver tus records personales y estadísticas de entrenamiento."
             action={{
-              label: "Iniciar Sesión",
-              onClick: () => requireAuth(() => {})
+              label: 'Iniciar Sesión',
+              onClick: () => requireAuth(() => {}),
             }}
+          />
+        ) : loading ? (
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-4 bg-slate-700 rounded w-1/3 mb-2"></div>
+                <div className="h-6 bg-slate-700 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <EmptyState
+            icon={<Award size={48} />}
+            title="Error al cargar records"
+            description="No pudimos cargar tus records personales. Intenta nuevamente."
           />
         ) : !hasData ? (
           <EmptyState
@@ -45,11 +56,10 @@ export function ExerciseRecords({ exerciseId }: ExerciseRecordsProps) {
             title="Sin Records Aún"
             description="Comienza a entrenar para establecer tus primeros records personales. Cada entrenamiento te acercará a nuevas metas."
             action={{
-              label: "Iniciar Entrenamiento",
+              label: 'Iniciar Entrenamiento',
               onClick: () => {
-                // TODO: Navigate to training module
-                // router.push('/training/new')
-              }
+                window.location.href = '/training'
+              },
             }}
           />
         ) : (

@@ -20,17 +20,24 @@ export type AuthState = {
 export type AuthProvider = 'email' | 'google'
 
 // Datos de registro
-export type SignUpData = {
-  email: string
-  password: string
-  username: string
-  full_name?: string
+export interface AuthError {
+  message: string
+  status?: number
+  code?: string
+  details?: Record<string, unknown>
 }
 
 // Datos de login
 export type SignInData = {
   email: string
   password: string
+}
+
+// Datos de registro
+export type SignUpData = {
+  email: string
+  password: string
+  full_name?: string
 }
 
 // Datos de perfil para completar post-OAuth
@@ -45,16 +52,16 @@ export type ProfileCompletionData = {
 }
 
 // Respuestas de API
-export type AuthResponse<T = any> = {
+export type AuthResponse<T = unknown> = {
   data: T | null
   error: string | null
   success: boolean
 }
 
 // Eventos de autenticación
-export type AuthEvent = 
+export type AuthEvent =
   | 'SIGNED_IN'
-  | 'SIGNED_OUT' 
+  | 'SIGNED_OUT'
   | 'TOKEN_REFRESHED'
   | 'USER_UPDATED'
   | 'PROFILE_COMPLETED'
@@ -68,7 +75,7 @@ export type UseAuthReturn = {
   loading: boolean
   isAuthenticated: boolean
   profileCompleted: boolean
-  
+
   // Acciones
   signUp: (data: SignUpData) => Promise<AuthResponse>
   signIn: (data: SignInData) => Promise<AuthResponse>
@@ -76,7 +83,7 @@ export type UseAuthReturn = {
   signOut: () => Promise<AuthResponse>
   updateProfile: (data: UserProfileUpdate) => Promise<AuthResponse>
   completeProfile: (data: ProfileCompletionData) => Promise<AuthResponse>
-  
+
   // Utilidades
   refreshSession: () => Promise<void>
   checkUsername: (username: string) => Promise<boolean>

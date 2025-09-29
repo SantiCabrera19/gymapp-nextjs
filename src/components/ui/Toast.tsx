@@ -17,13 +17,13 @@ interface ToastProps {
 const toastIcons = {
   success: CheckCircle,
   error: XCircle,
-  warning: AlertCircle
+  warning: AlertCircle,
 }
 
 const toastStyles = {
   success: 'bg-status-success/10 border-status-success/20 text-status-success',
   error: 'bg-status-error/10 border-status-error/20 text-status-error',
-  warning: 'bg-status-warning/10 border-status-warning/20 text-status-warning'
+  warning: 'bg-status-warning/10 border-status-warning/20 text-status-warning',
 }
 
 export function Toast({ message, type, isVisible, onClose, duration = 4000 }: ToastProps) {
@@ -39,11 +39,13 @@ export function Toast({ message, type, isVisible, onClose, duration = 4000 }: To
   if (!isVisible) return null
 
   return (
-    <div className={cn(
-      "fixed top-4 right-4 z-50 flex items-center gap-3 p-4 rounded-lg border shadow-lg transition-all duration-300",
-      toastStyles[type],
-      isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-    )}>
+    <div
+      className={cn(
+        'fixed top-4 right-4 z-50 flex items-center gap-3 p-4 rounded-lg border shadow-lg transition-all duration-300',
+        toastStyles[type],
+        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+      )}
+    >
       <Icon className="h-5 w-5 flex-shrink-0" />
       <span className="text-sm font-medium">{message}</span>
       <button
@@ -69,7 +71,7 @@ export function useToast() {
   }
 
   const hideToast = () => {
-    setToast(prev => prev ? { ...prev, isVisible: false } : null)
+    setToast(prev => (prev ? { ...prev, isVisible: false } : null))
   }
 
   return {
@@ -78,6 +80,6 @@ export function useToast() {
     hideToast,
     showSuccess: (message: string) => showToast(message, 'success'),
     showError: (message: string) => showToast(message, 'error'),
-    showWarning: (message: string) => showToast(message, 'warning')
+    showWarning: (message: string) => showToast(message, 'warning'),
   }
 }

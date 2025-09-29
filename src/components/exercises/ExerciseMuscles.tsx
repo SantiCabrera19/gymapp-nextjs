@@ -12,7 +12,9 @@ interface ExerciseMusclesProps {
 
 export function ExerciseMuscles({ primaryMuscle, secondaryMuscles }: ExerciseMusclesProps) {
   const primary = MUSCLE_GROUPS.find(m => m.id === primaryMuscle)
-  const secondaries = secondaryMuscles.map(id => MUSCLE_GROUPS.find(m => m.id === id)).filter(Boolean)
+  const secondaries = secondaryMuscles
+    .map(id => MUSCLE_GROUPS.find(m => m.id === id))
+    .filter(Boolean)
 
   return (
     <Card className="p-6">
@@ -29,7 +31,7 @@ export function ExerciseMuscles({ primaryMuscle, secondaryMuscles }: ExerciseMus
               <Zap className="text-red-400" size={16} />
               Músculo Principal
             </h3>
-            
+
             {primary && (
               <div className="inline-flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30">
                 <span className="text-2xl">{primary.icon}</span>
@@ -48,17 +50,23 @@ export function ExerciseMuscles({ primaryMuscle, secondaryMuscles }: ExerciseMus
                 <Target className="text-blue-400" size={16} />
                 Músculos Secundarios
               </h3>
-              
+
               <div className="flex flex-wrap gap-3">
-                {secondaries.map((muscle) => muscle && (
-                  <div key={muscle.id} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30">
-                    <span className="text-lg">{muscle.icon}</span>
-                    <div>
-                      <div className="text-sm font-medium text-white">{muscle.name}</div>
-                      <div className="text-xs text-slate-400">Soporte</div>
-                    </div>
-                  </div>
-                ))}
+                {secondaries.map(
+                  muscle =>
+                    muscle && (
+                      <div
+                        key={muscle.id}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30"
+                      >
+                        <span className="text-lg">{muscle.icon}</span>
+                        <div>
+                          <div className="text-sm font-medium text-white">{muscle.name}</div>
+                          <div className="text-xs text-slate-400">Soporte</div>
+                        </div>
+                      </div>
+                    )
+                )}
               </div>
             </div>
           )}
@@ -70,7 +78,7 @@ export function ExerciseMuscles({ primaryMuscle, secondaryMuscles }: ExerciseMus
                 <Target className="text-blue-400" size={16} />
                 Músculos Secundarios
               </h3>
-              
+
               <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 text-center">
                 <p className="text-sm text-slate-400">
                   Este ejercicio se enfoca principalmente en un grupo muscular específico

@@ -12,7 +12,7 @@ export type {
   ExerciseRecordWithExercise,
   UserOverallStats,
   RecordType,
-  ProgressTrend
+  ProgressTrend,
 } from './user-exercises'
 export type {
   WorkoutSession,
@@ -27,5 +27,5 @@ export type {
   WorkoutFormData,
   SetType,
   WorkoutStatus,
-  RestTimerPreset
+  RestTimerPreset,
 } from './training'

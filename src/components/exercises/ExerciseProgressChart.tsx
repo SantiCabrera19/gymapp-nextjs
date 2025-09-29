@@ -5,6 +5,7 @@ import { TrendingUp, Calendar, BarChart3, Activity, LineChart } from 'lucide-rea
 import { Card, Button } from '@/components/ui'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuthAction } from '@/hooks/useRequireAuth'
+import { useExerciseProgress } from '@/hooks'
 
 interface ExerciseProgressChartProps {
   exerciseId: string
@@ -26,53 +27,64 @@ export function ExerciseProgressChart({ exerciseId }: ExerciseProgressChartProps
   const { requireAuth, isAuthenticated } = useAuthAction()
   const [chartType, setChartType] = useState<'weight' | 'volume' | 'reps'>('weight')
 
-  // TODO: Replace with real API call - useExerciseProgress(exerciseId)
-  const hasData = false
-  const chartData = hasData ? {
-    weight: [
-      { date: '2024-03', value: 20, label: '20kg' },
-      { date: '2024-04', value: 22.5, label: '22.5kg' },
-      { date: '2024-05', value: 25, label: '25kg' },
-      { date: '2024-06', value: 27.5, label: '27.5kg' },
-      { date: '2024-07', value: 30, label: '30kg' },
-      { date: '2024-08', value: 32.5, label: '32.5kg' }
-    ],
-    volume: [
-      { date: '2024-03', value: 1200, label: '1,200kg' },
-      { date: '2024-04', value: 1350, label: '1,350kg' },
-      { date: '2024-05', value: 1500, label: '1,500kg' },
-      { date: '2024-06', value: 1650, label: '1,650kg' },
-      { date: '2024-07', value: 1800, label: '1,800kg' },
-      { date: '2024-08', value: 1950, label: '1,950kg' }
-    ],
-    reps: [
-      { date: '2024-03', value: 8, label: '8 reps' },
-      { date: '2024-04', value: 10, label: '10 reps' },
-      { date: '2024-05', value: 10, label: '10 reps' },
-      { date: '2024-06', value: 12, label: '12 reps' },
-      { date: '2024-07', value: 12, label: '12 reps' },
-      { date: '2024-08', value: 15, label: '15 reps' }
-    ]
-  } : null
+  // Usar hook real para obtener progreso
+  const { progress, loading, error } = useExerciseProgress(exerciseId)
+  const hasData = progress && progress.length > 0
+  const chartData = hasData
+    ? {
+        weight: [
+          { date: '2024-03', value: 20, label: '20kg' },
+          { date: '2024-04', value: 22.5, label: '22.5kg' },
+          { date: '2024-05', value: 25, label: '25kg' },
+          { date: '2024-06', value: 27.5, label: '27.5kg' },
+          { date: '2024-07', value: 30, label: '30kg' },
+          { date: '2024-08', value: 32.5, label: '32.5kg' },
+        ],
+        volume: [
+          { date: '2024-03', value: 1200, label: '1,200kg' },
+          { date: '2024-04', value: 1350, label: '1,350kg' },
+          { date: '2024-05', value: 1500, label: '1,500kg' },
+          { date: '2024-06', value: 1650, label: '1,650kg' },
+          { date: '2024-07', value: 1800, label: '1,800kg' },
+          { date: '2024-08', value: 1950, label: '1,950kg' },
+        ],
+        reps: [
+          { date: '2024-03', value: 8, label: '8 reps' },
+          { date: '2024-04', value: 10, label: '10 reps' },
+          { date: '2024-05', value: 10, label: '10 reps' },
+          { date: '2024-06', value: 12, label: '12 reps' },
+          { date: '2024-07', value: 12, label: '12 reps' },
+          { date: '2024-08', value: 15, label: '15 reps' },
+        ],
+      }
+    : null
 
   const currentData: ChartDataPoint[] = chartData?.[chartType] || []
   const maxValue = currentData.length > 0 ? Math.max(...currentData.map(d => d.value)) : 0
 
   const getChartColor = (type: string) => {
     switch (type) {
-      case 'weight': return 'bg-blue-500'
-      case 'volume': return 'bg-green-500'
-      case 'reps': return 'bg-purple-500'
-      default: return 'bg-blue-500'
+      case 'weight':
+        return 'bg-blue-500'
+      case 'volume':
+        return 'bg-green-500'
+      case 'reps':
+        return 'bg-purple-500'
+      default:
+        return 'bg-blue-500'
     }
   }
 
   const getChartIcon = (type: string) => {
     switch (type) {
-      case 'weight': return <BarChart3 size={16} />
-      case 'volume': return <TrendingUp size={16} />
-      case 'reps': return <Activity size={16} />
-      default: return <BarChart3 size={16} />
+      case 'weight':
+        return <BarChart3 size={16} />
+      case 'volume':
+        return <TrendingUp size={16} />
+      case 'reps':
+        return <Activity size={16} />
+      default:
+        return <BarChart3 size={16} />
     }
   }
 
@@ -83,8 +95,8 @@ export function ExerciseProgressChart({ exerciseId }: ExerciseProgressChartProps
         title="Inicia Sesión para Ver Progreso"
         description="Necesitas estar autenticado para ver tus gráficos de progreso y evolución en los ejercicios."
         action={{
-          label: "Iniciar Sesión",
-          onClick: () => requireAuth(() => {})
+          label: 'Iniciar Sesión',
+          onClick: () => requireAuth(() => {}),
         }}
       />
     )
@@ -97,11 +109,11 @@ export function ExerciseProgressChart({ exerciseId }: ExerciseProgressChartProps
         title="Sin Datos de Progreso"
         description="Comienza a entrenar para ver tu progreso a lo largo del tiempo. Cada entrenamiento se registrará aquí."
         action={{
-          label: "Iniciar Entrenamiento",
+          label: 'Iniciar Entrenamiento',
           onClick: () => {
             // TODO: Navigate to training module
             // router.push('/training/new')
-          }
+          },
         }}
       />
     )
@@ -165,9 +177,9 @@ export function ExerciseProgressChart({ exerciseId }: ExerciseProgressChartProps
                   <div className="h-8 bg-slate-700/50 rounded-md overflow-hidden">
                     <div
                       className={`h-full ${getChartColor(chartType)} transition-all duration-500 ease-out rounded-md`}
-                      style={{ 
+                      style={{
                         width: `${(item.value / maxValue) * 100}%`,
-                        animationDelay: `${index * 100}ms`
+                        animationDelay: `${index * 100}ms`,
                       }}
                     />
                   </div>

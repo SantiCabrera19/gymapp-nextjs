@@ -23,7 +23,8 @@ export async function uploadAvatar(file: File, userId: string): Promise<UploadAv
       return { success: false, error: 'El archivo debe ser una imagen' }
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB
       return { success: false, error: 'El archivo es muy grande. Máximo 5MB.' }
     }
 
@@ -33,12 +34,10 @@ export async function uploadAvatar(file: File, userId: string): Promise<UploadAv
     const filePath = fileName
 
     // Subir archivo a Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
+    const { data, error } = await supabase.storage.from('avatars').upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
 
     if (error) {
       console.error('Error uploading avatar:', error)
@@ -46,9 +45,9 @@ export async function uploadAvatar(file: File, userId: string): Promise<UploadAv
     }
 
     // Obtener URL pública
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('avatars').getPublicUrl(filePath)
 
     return { success: true, url: publicUrl }
   } catch (error) {
@@ -69,9 +68,7 @@ export async function deleteAvatar(avatarUrl: string): Promise<DeleteAvatarResul
     const filePath = fileName // Sin prefijo 'avatars/'
 
     // Eliminar archivo del Storage
-    const { error } = await supabase.storage
-      .from('avatars')
-      .remove([filePath])
+    const { error } = await supabase.storage.from('avatars').remove([filePath])
 
     if (error) {
       console.error('Error deleting avatar:', error)
@@ -88,7 +85,10 @@ export async function deleteAvatar(avatarUrl: string): Promise<DeleteAvatarResul
 /**
  * Actualiza el avatar del usuario en la base de datos
  */
-export async function updateUserAvatar(userId: string, avatarUrl: string | null): Promise<UploadAvatarResult> {
+export async function updateUserAvatar(
+  userId: string,
+  avatarUrl: string | null
+): Promise<UploadAvatarResult> {
   try {
     const { data, error } = await supabase
       .from('users')
@@ -111,7 +111,11 @@ export async function updateUserAvatar(userId: string, avatarUrl: string | null)
 /**
  * Proceso completo: subir nueva imagen y actualizar perfil
  */
-export async function changeUserAvatar(file: File, userId: string, currentAvatarUrl?: string): Promise<UploadAvatarResult> {
+export async function changeUserAvatar(
+  file: File,
+  userId: string,
+  currentAvatarUrl?: string
+): Promise<UploadAvatarResult> {
   try {
     // 1. Subir nueva imagen
     const uploadResult = await uploadAvatar(file, userId)
@@ -142,11 +146,14 @@ export async function changeUserAvatar(file: File, userId: string, currentAvatar
 /**
  * Eliminar avatar actual y resetear a null
  */
-export async function removeUserAvatar(userId: string, currentAvatarUrl?: string): Promise<DeleteAvatarResult> {
+export async function removeUserAvatar(
+  userId: string,
+  currentAvatarUrl?: string
+): Promise<DeleteAvatarResult> {
   try {
     // 1. Actualizar base de datos primero
     const updateResult = await updateUserAvatar(userId, null)
-    
+
     if (!updateResult.success) {
       return { success: false, error: updateResult.error }
     }

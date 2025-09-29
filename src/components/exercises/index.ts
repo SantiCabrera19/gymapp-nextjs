@@ -3,7 +3,11 @@ export { ExerciseCatalog } from './ExerciseCatalog'
 export { ExerciseCard } from './ExerciseCard'
 export { ExerciseSearch } from './ExerciseSearch'
 export { ExerciseFilters } from './ExerciseFilters'
-export { ExercisesGridSkeleton, ExerciseCardSkeleton, ExercisesPageSkeleton } from './ExercisesSkeleton'
+export {
+  ExercisesGridSkeleton,
+  ExerciseCardSkeleton,
+  ExercisesPageSkeleton,
+} from './ExercisesSkeleton'
 
 // Exercise Detail Components
 export { ExerciseDetailView } from './ExerciseDetailView'
