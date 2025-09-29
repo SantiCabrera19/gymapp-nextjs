@@ -1,7 +1,32 @@
+/**
+ * TRAINING PAGE - PÁGINA PRINCIPAL DE ENTRENAMIENTO
+ * 
+ * FUNCIONALIDADES:
+ * - Selección de rutinas desde la base de datos real
+ * - Inicio de entrenamientos con validación completa
+ * - Persistencia de rutina seleccionada en localStorage
+ * - Estados UX completos (loading, error, empty, success)
+ * - Integración completa con useTraining hook
+ * 
+ * VALIDACIONES CRÍTICAS:
+ * - Usuario debe estar autenticado
+ * - Rutina debe estar seleccionada antes de iniciar
+ * - Rutina debe tener ejercicios válidos
+ * - No se permite hardcode de datos
+ * 
+ * ESTADOS MANEJADOS:
+ * - selectedRoutine: Rutina elegida por el usuario (persistida)
+ * - startingWorkout: Estado de loading al iniciar entrenamiento
+ * - showRoutineSelector: Modal de selección de rutinas
+ * - workoutHistory: Historial real desde la BD
+ * 
+ * @author GymApp Team
+ * @version 2.0 - Production Ready
+ */
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Play, Plus, Clock, TrendingUp, Calendar, Dumbbell, Target } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Play, Plus, Clock, TrendingUp, Calendar, Dumbbell, Target, X } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { AppLayout } from '@/components/layout/AppLayout'
@@ -19,13 +44,36 @@ export default function TrainingPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
   const { requireAuth } = useAuthAction()
-  const { activeSession, startWorkout, loading, initialized } = useTraining()
+  const { activeSession, startWorkout, completeWorkout, loading, initialized } = useTraining()
   
   const [workoutHistory, setWorkoutHistory] = useState<WorkoutSession[]>([])
   const [historyLoading, setHistoryLoading] = useState(true)
   const [selectedRoutine, setSelectedRoutine] = useState<Routine | null>(null)
   const [showRoutineSelector, setShowRoutineSelector] = useState(false)
   const [startingWorkout, setStartingWorkout] = useState(false)
+
+  // Persistir rutina seleccionada en localStorage
+  useEffect(() => {
+    const savedRoutineId = localStorage.getItem('selectedRoutineId')
+    if (savedRoutineId && user?.id) {
+      // Cargar rutina desde la API si existe el ID guardado
+      import('@/lib/api/routines').then(({ getRoutineById }) => {
+        getRoutineById(savedRoutineId, user.id)
+          .then(routine => {
+            if (routine) setSelectedRoutine(routine)
+          })
+          .catch(() => {
+            // Si no se puede cargar, limpiar localStorage
+            localStorage.removeItem('selectedRoutineId')
+          })
+      })
+    }
+  }, [user?.id])
+
+  // Limpiar estado de loading al montar componente
+  useEffect(() => {
+    setStartingWorkout(false)
+  }, [])
 
   // Cargar historial SOLO una vez por usuario
   useEffect(() => {
@@ -40,14 +88,16 @@ export default function TrainingPage() {
     const loadHistory = async () => {
       try {
         setHistoryLoading(true)
+        console.log('📊 Cargando historial real para usuario:', user.id)
         const history = await getUserWorkoutHistory(user.id, 10)
         if (mounted) {
           setWorkoutHistory(history)
+          console.log('✅ Historial cargado:', history.length, 'entrenamientos')
         }
       } catch (error) {
-        console.error('Error loading workout history:', error)
+        console.error('❌ Error loading workout history:', error)
         if (mounted) {
-          setWorkoutHistory([])
+          setWorkoutHistory([]) // Asegurar array vacío en error
         }
       } finally {
         if (mounted) {
@@ -63,12 +113,49 @@ export default function TrainingPage() {
     }
   }, [user?.id])
 
+  // Función para limpiar sesiones inválidas (sin rutina) - DECLARAR ANTES DE USAR
+  const cleanInvalidSessions = useCallback(async () => {
+    console.log('🧹 Limpiando sesiones inválidas...')
+    
+    if (activeSession && !activeSession.routine_id) {
+      console.warn('Sesión activa sin rutina detectada, limpiando...')
+      try {
+        await completeWorkout(0) // Finalizar sesión inválida
+        console.log('✅ Sesión inválida limpiada')
+      } catch (error) {
+        console.error('Error cleaning invalid session:', error)
+      }
+    } else {
+      console.log('ℹ️ No hay sesiones inválidas para limpiar')
+    }
+    
+    // Forzar recarga del historial
+    if (user?.id) {
+      try {
+        const history = await getUserWorkoutHistory(user.id, 10)
+        setWorkoutHistory(history)
+        console.log('🔄 Historial recargado:', history.length, 'entrenamientos')
+      } catch (error) {
+        console.error('Error reloading history:', error)
+      }
+    }
+  }, [activeSession, completeWorkout, user?.id])
+
   // Redirigir SOLO si hay sesión activa Y está inicializado
   useEffect(() => {
     if (initialized && activeSession && !loading) {
+      // Verificar si la sesión es válida (tiene rutina)
+      if (!activeSession.routine_id) {
+        console.warn('Sesión sin rutina detectada, limpiando automáticamente...')
+        cleanInvalidSessions()
+        return
+      }
+      
+      // Limpiar estado de starting antes de redirigir
+      setStartingWorkout(false)
       router.push('/training/active')
     }
-  }, [activeSession, initialized, loading, router])
+  }, [activeSession, initialized, loading, router, cleanInvalidSessions])
 
   const handleStartWorkout = async () => {
     if (!isAuthenticated) {
@@ -81,6 +168,14 @@ export default function TrainingPage() {
       return
     }
 
+    // Validación adicional de rutina
+    if (!selectedRoutine.id || !selectedRoutine.exercises || selectedRoutine.exercises.length === 0) {
+      alert('La rutina seleccionada no es válida o no tiene ejercicios.')
+      setSelectedRoutine(null)
+      localStorage.removeItem('selectedRoutineId')
+      return
+    }
+
     try {
       setStartingWorkout(true)
       await startWorkout(selectedRoutine.id, {
@@ -89,6 +184,8 @@ export default function TrainingPage() {
       // La redirección se maneja en el useEffect de arriba
     } catch (error) {
       console.error('Error starting workout:', error)
+      alert('Error al iniciar el entrenamiento. Por favor, intenta nuevamente.')
+    } finally {
       setStartingWorkout(false)
     }
   }
@@ -100,7 +197,42 @@ export default function TrainingPage() {
   const handleSelectRoutine = (routine: Routine) => {
     setSelectedRoutine(routine)
     setShowRoutineSelector(false)
+    // Persistir selección en localStorage
+    localStorage.setItem('selectedRoutineId', routine.id)
   }
+
+  const handleFinishWorkout = async () => {
+    if (!activeSession) return
+
+    const confirmed = confirm('¿Estás seguro de que quieres finalizar el entrenamiento?')
+    if (!confirmed) return
+
+    try {
+      await completeWorkout()
+      // Recargar historial después de completar
+      if (user?.id) {
+        const history = await getUserWorkoutHistory(user.id, 10)
+        setWorkoutHistory(history)
+      }
+    } catch (error) {
+      console.error('Error finishing workout:', error)
+    }
+  }
+
+  // Función para limpiar estado completamente
+  const resetTrainingState = () => {
+    setSelectedRoutine(null)
+    setStartingWorkout(false)
+    setShowRoutineSelector(false)
+    setWorkoutHistory([]) // Limpiar historial hardcodeado
+    setHistoryLoading(false)
+    localStorage.removeItem('selectedRoutineId')
+    console.log('🧹 Estado limpiado completamente')
+  }
+
+  // Función duplicada eliminada - ya está declarada arriba
+
+  // Debug removido - causaba loop infinito
 
   if (!isAuthenticated) {
     return (
@@ -117,6 +249,9 @@ export default function TrainingPage() {
       </AppLayout>
     )
   }
+
+  // REMOVER DEBUG - CAUSA LOOP INFINITO
+  // Debug removido para evitar re-renders infinitos
 
   return (
     <AppLayout>
@@ -147,12 +282,23 @@ export default function TrainingPage() {
                 </div>
               </div>
             </div>
-            <Link href="/training/active">
-              <Button size="lg" className="bg-green-500 hover:bg-green-600">
-                <Play size={20} className="mr-2" />
-                Continuar Entrenamiento
+            <div className="flex gap-3">
+              <Link href="/training/active">
+                <Button size="lg" className="bg-green-500 hover:bg-green-600 transition-all duration-200 hover:scale-105 active:scale-95">
+                  <Play size={20} className="mr-2" />
+                  Continuar Entrenamiento
+                </Button>
+              </Link>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                onClick={handleFinishWorkout}
+              >
+                <Target size={20} className="mr-2" />
+                Finalizar
               </Button>
-            </Link>
+            </div>
           </div>
         </Card>
       ) : (
@@ -163,33 +309,80 @@ export default function TrainingPage() {
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-white">¿Listo para entrenar?</h3>
-              <p className="text-slate-400">
-                Inicia una nueva sesión de entrenamiento y registra tu progreso.
-              </p>
-            </div>
-            <Button
-              size="lg"
-              onClick={handleStartWorkout}
-              disabled={loading}
-              className="transition-all duration-200 hover:scale-105 active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl disabled:hover:scale-100"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  Iniciando...
+              {selectedRoutine ? (
+                <div className="space-y-2">
+                  <p className="text-slate-400">
+                    Rutina seleccionada: <span className="text-accent-primary font-medium">{selectedRoutine.name}</span>
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    {selectedRoutine.exercises?.length || 0} ejercicios • ~{selectedRoutine.estimated_duration_minutes} min
+                  </p>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Plus size={20} />
-                  Iniciar Entrenamiento
+                <p className="text-slate-400">
+                  Selecciona una rutina para comenzar tu entrenamiento.
+                </p>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button
+                size="lg"
+                onClick={handleStartWorkout}
+                disabled={startingWorkout}
+                className="transition-all duration-200 hover:scale-105 active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl disabled:hover:scale-100 disabled:opacity-50"
+              >
+                {startingWorkout ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    Iniciando...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Play size={20} />
+                    {selectedRoutine ? 'Iniciar Entrenamiento' : 'Seleccionar Rutina'}
+                  </div>
+                )}
+              </Button>
+              
+              {selectedRoutine && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setShowRoutineSelector(true)}
+                  className="transition-all duration-200 hover:scale-105 active:scale-95"
+                >
+                  Cambiar Rutina
+                </Button>
+              )}
+              
+              {/* Debug buttons - remover en producción */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={resetTrainingState}
+                    className="text-red-400 hover:text-red-300"
+                  >
+                    Reset State
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={cleanInvalidSessions}
+                    className="text-yellow-400 hover:text-yellow-300"
+                  >
+                    Clean Sessions
+                  </Button>
                 </div>
               )}
-            </Button>
+            </div>
           </div>
         </Card>
       )}
 
-      {/* Estadísticas rápidas */}
+      {/* Estadísticas rápidas - SOLO mostrar si hay datos reales */}
+      {!historyLoading && workoutHistory.length > 0 && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6 text-center">
           <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -228,13 +421,18 @@ export default function TrainingPage() {
           <div className="text-sm text-slate-400">Esta semana</div>
         </Card>
       </div>
+      )}
 
       {/* Historial de entrenamientos */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">Entrenamientos Recientes</h2>
           {workoutHistory.length > 0 && (
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => router.push('/training/history')}
+            >
               Ver todos
             </Button>
           )}
@@ -292,6 +490,35 @@ export default function TrainingPage() {
           />
         )}
       </div>
+
+      {/* Routine Selector Modal */}
+      {showRoutineSelector && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background-primary border border-border-primary rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-border-primary">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-white">Seleccionar Rutina</h2>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setShowRoutineSelector(false)}
+                >
+                  <X size={20} />
+                </Button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <RoutineSelector
+                onSelectRoutine={handleSelectRoutine}
+                onCreateRoutine={handleCreateRoutine}
+                selectedRoutineId={selectedRoutine?.id}
+                title="Elige una rutina para entrenar"
+                showCreateButton={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </AppLayout>
   )

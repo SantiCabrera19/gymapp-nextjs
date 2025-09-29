@@ -118,13 +118,9 @@ export function AvatarSection({ avatar, name, onAvatarChange }: AvatarSectionPro
                 className="cursor-pointer"
                 onClick={(e) => {
                   e.preventDefault()
-                  console.log('Button clicked')
                   const input = document.getElementById('avatar-upload') as HTMLInputElement
                   if (input) {
-                    console.log('Input found, clicking')
                     input.click()
-                  } else {
-                    console.log('Input not found')
                   }
                 }}
               >

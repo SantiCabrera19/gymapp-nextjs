@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { getCurrentSession, getUserProfile, syncGoogleProfile } from '@/lib/api/auth'
+import { useLoadingTimeout } from './useLoadingTimeout'
 import type { Tables } from '@/types/database'
 
 export interface AuthState {
@@ -19,8 +20,8 @@ export interface AuthState {
 let globalAuthState: AuthState | null = null
 let listeners: Set<(state: AuthState) => void> = new Set()
 
-// Función helper para crear estado completo
-const createAuthState = (partial: Partial<AuthState>): AuthState => {
+// Función para actualizar estado global y notificar a todos los listeners
+const updateGlobalState = (newState: Partial<AuthState>) => {
   const updateProfile = (updatedProfile: Partial<Tables<'users'>>) => {
     if (globalAuthState?.profile) {
       updateGlobalState({
@@ -29,32 +30,24 @@ const createAuthState = (partial: Partial<AuthState>): AuthState => {
     }
   }
 
-  return {
+  const fullState: AuthState = {
     user: null,
     profile: null,
     session: null,
     loading: true,
     isAuthenticated: false,
     updateProfile,
-    ...partial,
+    ...globalAuthState,
+    ...newState,
   }
-}
-
-// Función para actualizar estado global y notificar a todos los listeners
-const updateGlobalState = (newState: Partial<AuthState>) => {
-  const fullState = createAuthState(newState)
+  
   globalAuthState = fullState
   listeners.forEach(listener => listener(fullState))
 }
 
-export function useAuth(): AuthState {
+export function useAuth(): AuthState & { hasTimedOut: boolean; retry: () => void } {
   const [state, setState] = useState<AuthState>(() => {
-    // Si ya hay estado global, usarlo
-    if (globalAuthState) {
-      return globalAuthState
-    }
-    // Estado inicial
-    return {
+    return globalAuthState || {
       user: null,
       profile: null,
       session: null,
@@ -62,6 +55,17 @@ export function useAuth(): AuthState {
       isAuthenticated: false,
       updateProfile: () => {},
     }
+  })
+  
+  // Hook de timeout para prevenir loading infinito
+  const {
+    hasTimedOut,
+    startLoading,
+    stopLoading,
+    retry: retryTimeout
+  } = useLoadingTimeout({
+    timeout: 8000, // 8 segundos máximo para auth
+    timeoutMessage: 'La autenticación está tardando más de lo esperado'
   })
 
   // Registrar listener para sincronización
@@ -82,12 +86,15 @@ export function useAuth(): AuthState {
     let mounted = true
 
     // Solo ejecutar la inicialización una vez globalmente
-    if (globalAuthState) {
+    if (globalAuthState && !globalAuthState.loading) {
+      stopLoading()
       return
     }
 
     const getInitialSession = async () => {
       try {
+        startLoading() // Iniciar timeout
+        
         const session = await getCurrentSession()
         
         if (!mounted) return
@@ -107,7 +114,6 @@ export function useAuth(): AuthState {
             profile = await getUserProfile(session.user.id)
           }
           
-          
           if (mounted) {
             updateGlobalState({
               user: session.user,
@@ -116,6 +122,7 @@ export function useAuth(): AuthState {
               loading: false,
               isAuthenticated: true,
             })
+            stopLoading() // Detener timeout
           }
         } else {
           if (mounted) {
@@ -126,6 +133,7 @@ export function useAuth(): AuthState {
               loading: false,
               isAuthenticated: false,
             })
+            stopLoading() // Detener timeout
           }
         }
       } catch (error) {
@@ -138,6 +146,7 @@ export function useAuth(): AuthState {
             loading: false,
             isAuthenticated: false,
           })
+          stopLoading('Error de autenticación: ' + (error instanceof Error ? error.message : 'Error desconocido'))
         }
       }
     }
@@ -203,5 +212,16 @@ export function useAuth(): AuthState {
     }
   }
 
-  return { ...state, updateProfile }
+  const retry = () => {
+    retryTimeout()
+    // Reiniciar la carga de auth
+    updateGlobalState({ loading: true })
+  }
+
+  return { 
+    ...state, 
+    updateProfile,
+    hasTimedOut,
+    retry
+  }
 }

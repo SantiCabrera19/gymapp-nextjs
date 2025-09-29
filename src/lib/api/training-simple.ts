@@ -50,11 +50,52 @@ export async function getActiveWorkoutSession(userId: string): Promise<WorkoutSe
     .from('workout_sessions')
     .select('*')
     .eq('user_id', userId)
-    .eq('status', 'active') // Usar status en lugar de completed_at
+    .eq('status', 'active')
     .order('started_at', { ascending: false })
     .limit(1)
+
+  if (error) {
+    console.error('Error fetching active session:', error)
+    throw error
+  }
+  
+  // Si no hay datos, retornar null (no hay sesión activa)
+  if (!data || data.length === 0) {
+    return null
+  }
+  
+  return transformWorkoutSessionFromDB(data[0])
+}
+
+export async function completeWorkoutSession(
+  sessionId: string,
+  totalDurationSeconds: number = 0
+): Promise<WorkoutSession> {
+  const now = new Date().toISOString()
+  
+  const { data: session, error } = await supabase
+    .from('workout_sessions')
+    .update({
+      status: 'completed',
+      completed_at: now,
+      total_duration_seconds: totalDurationSeconds
+    })
+    .eq('id', sessionId)
+    .select()
     .single()
 
-  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
-  return data ? transformWorkoutSessionFromDB(data) : null
+  if (error) throw error
+  return transformWorkoutSessionFromDB(session)
+}
+
+export async function cancelWorkoutSession(sessionId: string): Promise<void> {
+  const { error } = await supabase
+    .from('workout_sessions')
+    .update({
+      status: 'cancelled',
+      completed_at: new Date().toISOString()
+    })
+    .eq('id', sessionId)
+
+  if (error) throw error
 }

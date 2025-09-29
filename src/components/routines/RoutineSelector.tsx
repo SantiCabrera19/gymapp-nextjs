@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, Play, Plus, Clock, Target, Dumbbell } from 'lucide-react'
-import { Button, Card, Input } from '@/components/ui'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { Button, Card, Input, EmptyState } from '@/components/ui'
 import { getUserRoutines, type Routine } from '@/lib/api/routines'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'

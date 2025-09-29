@@ -3,28 +3,37 @@
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button, Progress, DashboardSkeleton } from '@/components/ui'
+import { LoadingErrorBoundary } from '@/components/ui/LoadingErrorBoundary'
 import { useAuth } from '@/hooks'
 import { Play, Calendar, TrendingUp, Plus, Dumbbell, Clock, Users, BookOpen, Target } from 'lucide-react'
 export default function DashboardPage() {
-  const { isAuthenticated, profile, loading } = useAuth()
+  const { isAuthenticated, profile, loading, hasTimedOut, retry } = useAuth()
 
   return (
     <AppLayout>
       <div className="space-y-8">
-        {loading ? (
-          <DashboardSkeleton />
-        ) : (
+        <LoadingErrorBoundary
+          isLoading={loading}
+          error={null}
+          hasTimedOut={hasTimedOut}
+          onRetry={retry}
+          onRefresh={() => window.location.reload()}
+          loadingSkeleton={<DashboardSkeleton />}
+        >
           <>
-            {/* Page header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-text-primary">
-                  {isAuthenticated ? `Hola, ${profile?.full_name?.split(' ')[0] || 'Usuario'}` : 'Dashboard'}
-                </h1>
-                <p className="text-text-secondary">
-                  {isAuthenticated ? 'Continúa tu progreso y alcanza tus objetivos' : 'Explora rutinas y ejercicios para comenzar tu entrenamiento'}
-                </p>
-              </div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pb-2">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-white leading-tight">
+              {isAuthenticated ? `Hola, ${profile?.full_name?.split(' ')[0] || 'Usuario'}` : '¡Bienvenido a GymApp!'}
+            </h1>
+            <p className="text-slate-400 text-lg leading-relaxed">
+              {isAuthenticated 
+                ? 'Continúa tu progreso y alcanza tus objetivos' 
+                : 'Inicia sesión para acceder a todas las funcionalidades'
+              }
+            </p>
+          </div>
               {isAuthenticated && (
                 <Button variant="outline" size="default" className="w-full sm:w-auto rounded-md">
                   <div className="w-4 h-4 rounded-sm bg-white/20 mr-2 flex items-center justify-center ring-1 ring-white/20">
@@ -38,78 +47,78 @@ export default function DashboardPage() {
             {/* Conditional content based on authentication */}
             {isAuthenticated ? (
               // Authenticated user dashboard
-              <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Active Routine Card - TODO: Connect to real data */}
-            <Card hover="lift" className="border-accent-primary/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Rutina Activa</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-sky-400" />
+              <div className="!grid !grid-cols-1 md:!grid-cols-2 xl:!grid-cols-3 !gap-8 !w-full !mt-8">
+              {/* Card 1: Rutina Activa */}
+              <Card className="!flex !flex-col !h-full border-accent-primary/20 !p-6">
+                <CardHeader className="pb-4 !p-0">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold">Rutina Activa</CardTitle>
+                    <div className="h-8 w-8 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
+                      <Calendar className="h-4 w-4 text-sky-400" />
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm text-text-secondary">No tienes rutina activa</p>
-                  <div className="pt-2">
-                    <Button size="sm" variant="outline" className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Crear Primera Rutina
-                    </Button>
+                </CardHeader>
+                <CardContent className="!flex-1 !p-0 !pt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-text-secondary leading-relaxed">No tienes rutina activa</p>
+                    <div className="pt-2">
+                      <Button size="sm" variant="outline" className="w-full h-10">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Crear Primera Rutina
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Workout History Card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Entrenamientos</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-emerald-400" />
+              {/* Card 2: Entrenamientos */}
+              <Card className="!flex !flex-col !h-full !p-6">
+                <CardHeader className="pb-4 !p-0">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold">Entrenamientos</CardTitle>
+                    <div className="h-8 w-8 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
+                      <Clock className="h-4 w-4 text-emerald-400" />
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm text-text-secondary">Historial de entrenamientos</p>
-                  <p className="text-lg font-semibold text-text-primary">0 completados</p>
-                  <p className="text-xs text-text-tertiary">¡Comienza tu primer entrenamiento!</p>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="!flex-1 !p-0 !pt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-text-secondary leading-relaxed">Historial de entrenamientos</p>
+                    <p className="text-2xl font-bold text-text-primary">0 completados</p>
+                    <p className="text-xs text-text-tertiary leading-relaxed">¡Comienza tu primer entrenamiento!</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Progress Card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Tu Progreso</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-amber-400" />
+              {/* Card 3: Progreso */}
+              <Card className="!flex !flex-col !h-full !p-6">
+                <CardHeader className="pb-4 !p-0">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold">Tu Progreso</CardTitle>
+                    <div className="h-8 w-8 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-amber-400" />
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm text-text-secondary">Progreso esta semana</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-text-primary">0/7</span>
-                    <span className="text-xs text-text-tertiary">días activos</span>
+                </CardHeader>
+                <CardContent className="!flex-1 !p-0 !pt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-text-secondary leading-relaxed">Progreso esta semana</p>
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-2xl font-bold text-text-primary">0/7</span>
+                      <span className="text-sm text-text-tertiary">días activos</span>
+                    </div>
+                    <div className="pt-2">
+                      <Progress value={0} className="h-3 rounded-full" />
+                    </div>
                   </div>
-                  <div className="pt-2">
-                    <Progress value={0} className="h-2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          // Guest user dashboard - Professional showcase
-          <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                </CardContent>
+              </Card>
+            </div>
+            ) : (
+              // Guest user dashboard - Professional showcase
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
             {/* Feature showcase cards */}
-            <Card className="border-accent-primary/20">
+            <Card className="border-accent-primary/20 h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Rutinas Personalizadas</CardTitle>
@@ -130,7 +139,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Base de Ejercicios</CardTitle>
@@ -151,7 +160,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Comunidad Activa</CardTitle>
@@ -171,11 +180,11 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+              </div>
+            )}
 
         {/* Secondary grid - Conditional content */}
-        <div className="grid gap-5 grid-cols-1 lg:grid-cols-2">
+        <div className="grid gap-8 grid-cols-1 lg:grid-cols-2 mt-12">
           {/* Quick Actions Card */}
           <Card>
             <CardHeader className="pb-3">
@@ -206,7 +215,7 @@ export default function DashboardPage() {
           {/* Conditional welcome/onboarding card */}
           {isAuthenticated ? (
             // User stats or recent activity
-            <Card>
+            <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Actividad Reciente</CardTitle>
               </CardHeader>
@@ -268,8 +277,8 @@ export default function DashboardPage() {
             </Card>
           )}
         </div>
-            </>
-        )}
+          </>
+        </LoadingErrorBoundary>
       </div>
     </AppLayout>
   )

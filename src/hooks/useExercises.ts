@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from './useAuth'
+import { useLoadingTimeout } from './useLoadingTimeout'
 import { Exercise, ExerciseFilters } from '@/types/exercises'
 import { getExercises, getRecommendedExercises } from '../lib/api/exercises'
 
@@ -18,27 +19,57 @@ export function useExercises() {
   const { user, profile } = useAuth()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [filters, setFilters] = useState<ExerciseFilters>(initialFilters)
-  const [isFirstLoad, setIsFirstLoad] = useState(true) // Solo para primera carga
+  const [hasLoaded, setHasLoaded] = useState(false)
+  
+  // Hook de timeout para prevenir loading infinito
+  const {
+    isLoading,
+    hasTimedOut,
+    error: timeoutError,
+    startLoading,
+    stopLoading,
+    retry: retryTimeout
+  } = useLoadingTimeout({
+    timeout: 12000, // 12 segundos para exercises
+    timeoutMessage: 'La carga de ejercicios está tardando más de lo esperado'
+  })
 
-  // Cargar ejercicios con loading inteligente
+  // Cargar ejercicios con timeout y error handling robusto
   useEffect(() => {
+    let mounted = true
+    
     const loadExercises = async () => {
       try {
+        // Solo mostrar loading en primera carga o si no hay datos
+        if (!hasLoaded) {
+          startLoading()
+        }
+        
         const data = filters.recommendedOnly && profile
           ? await getRecommendedExercises(profile.experience_level || 'beginner')
-          : await getExercises(user?.id) // Pasar userId para incluir favoritos
+          : await getExercises(user?.id)
         
-        setExercises(data)
-        setIsFirstLoad(false) // Marcar que ya cargó una vez
+        if (mounted) {
+          setExercises(data)
+          setHasLoaded(true)
+          stopLoading() // Detener timeout exitosamente
+        }
       } catch (error) {
         console.error('Error loading exercises:', error)
-        setExercises([])
-        setIsFirstLoad(false)
+        if (mounted) {
+          setExercises([])
+          setHasLoaded(true)
+          stopLoading('Error cargando ejercicios: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+        }
       }
     }
 
     loadExercises()
-  }, [filters.recommendedOnly, profile, user?.id])
+    
+    return () => {
+      mounted = false
+    }
+  }, [filters.recommendedOnly, profile, user?.id, hasLoaded, startLoading, stopLoading])
 
   // Filtrar ejercicios
   const filteredExercises = useMemo(() => {
@@ -81,13 +112,22 @@ export function useExercises() {
     setFilters(initialFilters)
   }
 
+  const retry = () => {
+    setHasLoaded(false) // Forzar recarga
+    retryTimeout()
+  }
+
   return {
     exercises: filteredExercises,
-    isFirstLoad, // Solo true en la primera carga
+    isFirstLoad: isLoading && !hasLoaded, // Solo true durante primera carga real
+    isLoading,
+    hasTimedOut,
+    error: timeoutError,
     filters,
     updateFilter,
     resetFilters,
     totalCount: exercises.length,
-    filteredCount: filteredExercises.length
+    filteredCount: filteredExercises.length,
+    retry
   }
 }

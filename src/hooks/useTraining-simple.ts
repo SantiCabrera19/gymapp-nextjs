@@ -2,15 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from './useAuth'
-import {
-  createWorkoutSession,
-  getActiveWorkoutSession
-} from '@/lib/api/training-simple'
-import type {
-  WorkoutSession,
-  ActiveWorkoutSession,
-  WorkoutFormData
-} from '@/types/training'
+import { useLoadingTimeout } from './useLoadingTimeout'
+import { useRouter } from 'next/navigation'
+import { WorkoutSession } from '@/types/training'
+import { createWorkoutSession, getActiveWorkoutSession, completeWorkoutSession, cancelWorkoutSession } from '@/lib/api/training-simple'
 import { WORKOUT_STATUS } from '@/types/training'
 
 // =====================================================
@@ -19,10 +14,24 @@ import { WORKOUT_STATUS } from '@/types/training'
 
 export function useTraining() {
   const { user } = useAuth()
-  const [activeSession, setActiveSession] = useState<ActiveWorkoutSession | null>(null)
+  const router = useRouter()
+  const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
+  
+  // Hook de timeout para prevenir loading infinito
+  const {
+    isLoading: timeoutLoading,
+    hasTimedOut,
+    error: timeoutError,
+    startLoading,
+    stopLoading,
+    retry: retryTimeout
+  } = useLoadingTimeout({
+    timeout: 10000, // 10 segundos para training
+    timeoutMessage: 'La carga del entrenamiento está tardando más de lo esperado'
+  })
   
   // Refs para evitar re-renders
   const loadingRef = useRef(false)
@@ -30,62 +39,49 @@ export function useTraining() {
 
   // Cargar sesión activa SOLO una vez por usuario
   useEffect(() => {
-    // Evitar cargas duplicadas
-    if (loadingRef.current) return
+    let mounted = true
     
-    // Si no hay usuario, limpiar estado
-    if (!user?.id) {
-      setActiveSession(null)
-      setLoading(false)
-      setInitialized(true)
-      userIdRef.current = null
-      return
-    }
-
-    // Si es el mismo usuario, no recargar
-    if (userIdRef.current === user.id && initialized) {
-      return
-    }
-
     const loadActiveSession = async () => {
-      loadingRef.current = true
-      
+      if (!user) {
+        setLoading(false)
+        setInitialized(true)
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
         
         const session = await getActiveWorkoutSession(user.id)
         
-        if (session) {
-          const activeSession: ActiveWorkoutSession = {
-            ...session,
-            current_set_number: 1,
-            is_resting: false,
-            rest_timer_seconds: 0,
-            rest_timer_preset: 90
-          }
-          setActiveSession(activeSession)
-        } else {
-          setActiveSession(null)
+        if (mounted) {
+          setActiveSession(session)
         }
         
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error loading active session'
         console.error('Error loading active session:', err)
-        setError(err instanceof Error ? err.message : 'Error loading session')
-        setActiveSession(null)
+        
+        if (mounted) {
+          setError(errorMessage)
+        }
       } finally {
-        setLoading(false)
-        setInitialized(true)
-        loadingRef.current = false
-        userIdRef.current = user.id
+        if (mounted) {
+          setLoading(false)
+          setInitialized(true)
+        }
       }
     }
 
     loadActiveSession()
-  }, [user?.id]) // Solo depende del ID del usuario
-
+    
+    return () => {
+      mounted = false
+    }
+  }, [user?.id]) // SOLO depender del ID del usuario
+  
   // Crear nueva sesión CON RUTINA REQUERIDA
-  const startWorkout = useCallback(async (routineId: string, data: WorkoutFormData = {}) => {
+  const startWorkout = useCallback(async (routineId: string, data: any = {}) => {
     if (!user) throw new Error('User not authenticated')
     if (!routineId) throw new Error('Routine is required to start workout')
 
@@ -98,16 +94,8 @@ export function useTraining() {
         routine_id: routineId
       })
       
-      const activeSession: ActiveWorkoutSession = {
-        ...session,
-        current_set_number: 1,
-        is_resting: false,
-        rest_timer_seconds: 0,
-        rest_timer_preset: 90
-      }
-      
-      setActiveSession(activeSession)
-      return activeSession
+      setActiveSession(session)
+      return session
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error starting workout'
@@ -118,27 +106,38 @@ export function useTraining() {
     }
   }, [user])
 
-  // Completar entrenamiento
-  const completeWorkout = useCallback(async (totalDurationSeconds: number = 0) => {
+  // Completar entrenamiento - IMPLEMENTACIÓN REAL
+  const completeWorkout = useCallback(async (totalDurationSeconds?: number) => {
     if (!activeSession || !user) return
 
     try {
       setLoading(true)
-      
-      // TODO: Implementar API call completa cuando esté lista
-      // await completeWorkoutSession(activeSession.id, totalDurationSeconds)
-      
-      setActiveSession(null)
       setError(null)
       
+      // Calcular duración si no se proporciona
+      const duration = totalDurationSeconds || Math.floor(
+        (new Date().getTime() - new Date(activeSession.started_at).getTime()) / 1000
+      )
+      
+      // Llamada real a la API
+      await completeWorkoutSession(activeSession.id, duration)
+      
+      // Limpiar estado de forma segura
+      setActiveSession(null)
+      
+      // Forzar navegación después de limpiar estado
+      setTimeout(() => {
+        router.push('/training')
+      }, 100)
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error completing workout')
+      const errorMessage = err instanceof Error ? err.message : 'Error completing workout'
+      setError(errorMessage)
+      throw new Error(errorMessage)
     } finally {
       setLoading(false)
     }
-  }, [activeSession, user])
-
-  // Pausar entrenamiento
+  }, [activeSession, user, router])
   const pauseWorkout = useCallback(async () => {
     if (!activeSession) return
 
@@ -168,19 +167,36 @@ export function useTraining() {
 
     try {
       setLoading(true)
-      
-      // TODO: Implementar API call completa cuando esté lista
-      // await cancelWorkoutSession(activeSession.id)
-      
-      setActiveSession(null)
       setError(null)
       
+      // Llamada real a la API para cancelar
+      await cancelWorkoutSession(activeSession.id)
+      
+      // Limpiar estado de forma segura
+      setActiveSession(null)
+      
+      // Forzar navegación después de limpiar estado
+      setTimeout(() => {
+        router.push('/training')
+      }, 100)
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error canceling workout')
+      const errorMessage = err instanceof Error ? err.message : 'Error canceling workout'
+      setError(errorMessage)
+      console.error('Cancel workout error:', err)
     } finally {
       setLoading(false)
     }
-  }, [activeSession])
+  }, [activeSession, router])
+
+  const retry = () => {
+    setInitialized(false)
+    setError(null)
+    retryTimeout()
+  }
+
+  // Utilidades
+  const clearError = () => setError(null)
 
   return {
     // Estado
@@ -189,20 +205,17 @@ export function useTraining() {
     loading,
     error,
     initialized,
-    isActive: !!activeSession && activeSession.status === WORKOUT_STATUS.ACTIVE,
-    isPaused: !!activeSession && activeSession.status === WORKOUT_STATUS.PAUSED,
+    
+    // Estados derivados
+    isActive: activeSession?.status === 'active',
+    isPaused: activeSession?.status === 'paused',
     
     // Acciones
     startWorkout,
-    completeWorkout,
     pauseWorkout,
     resumeWorkout,
+    completeWorkout,
     cancelWorkout,
-    
-    // Placeholders para compatibilidad
-    addSet: async () => ({ id: '', workout_session_id: '', exercise_id: '', set_number: 1, set_type: 'normal' as const, reps_completed: 0, completed_at: '', created_at: '' }),
-    updateSet: async () => ({ id: '', workout_session_id: '', exercise_id: '', set_number: 1, set_type: 'normal' as const, reps_completed: 0, completed_at: '', created_at: '' }),
-    removeSet: async () => {},
     
     // Utilidades
     clearError: () => setError(null)

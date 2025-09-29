@@ -9,6 +9,8 @@ export interface Routine {
   difficulty_level: 'beginner' | 'intermediate' | 'advanced'
   estimated_duration_minutes: number
   is_active: boolean
+  is_public?: boolean
+  tags?: string[]
   created_at: string
   updated_at: string
   exercises?: RoutineExercise[]
@@ -18,10 +20,12 @@ export interface RoutineExercise {
   id: string
   routine_id: string
   exercise_id: string
-  order: number
+  order_in_routine: number
   sets: number
   reps: number
   rest_seconds: number
+  weight_suggestion_kg?: number
+  rpe_target?: number
   notes?: string
   exercise?: {
     id: string

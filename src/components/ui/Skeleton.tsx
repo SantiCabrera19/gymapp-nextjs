@@ -141,6 +141,68 @@ export function PageSkeleton() {
   )
 }
 
+// Skeleton específico para Exercise Cards
+export function ExerciseCardSkeleton({ delay = 0 }: { delay?: number }) {
+  return (
+    <div 
+      className="rounded-lg border border-border-primary bg-background-tertiary p-4"
+      style={{ 
+        animation: `fadeIn 0.4s ease-out ${delay}ms both`
+      }}
+    >
+      {/* Image placeholder */}
+      <div className="aspect-video mb-3 bg-gradient-to-br from-gray-700/30 via-gray-600/50 to-gray-700/30 rounded-md animate-pulse" />
+      
+      {/* Title */}
+      <Skeleton className="h-5 w-3/4 mb-2" />
+      
+      {/* Muscle group */}
+      <Skeleton className="h-4 w-1/2 mb-3" />
+      
+      {/* Tags */}
+      <div className="flex gap-2 mb-3">
+        <Skeleton className="h-6 w-16 rounded-full" />
+        <Skeleton className="h-6 w-20 rounded-full" />
+      </div>
+      
+      {/* Button */}
+      <Skeleton className="h-9 w-full rounded-md" />
+    </div>
+  )
+}
+
+// Skeleton para grid de ejercicios
+export function ExerciseGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <ExerciseCardSkeleton key={i} delay={i * 100} />
+      ))}
+    </div>
+  )
+}
+
+// Skeleton para filtros
+export function FiltersSkeleton() {
+  return (
+    <div className="space-y-4 p-4 bg-background-tertiary rounded-lg border border-border-primary">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-5 w-16" />
+        <Skeleton className="h-4 w-4 rounded" />
+      </div>
+      
+      <div className="space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <Skeleton className="h-4 w-4 rounded" />
+            <Skeleton className="h-4 w-20" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Skeleton específico para página de perfil
 export function ProfilePageSkeleton() {
   return (

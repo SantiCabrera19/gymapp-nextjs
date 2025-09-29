@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Search, Plus } from 'lucide-react'
+import { ArrowLeft, Search, Plus, Dumbbell, Clock, Target } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { ExerciseTimer, useExerciseTimer } from '@/components/training/ExerciseTimer'
+import { SetTracker } from '@/components/training/SetTracker'
 import { useTraining } from '@/hooks/useTraining-simple'
 import { useAuth } from '@/hooks'
 import { getExercises } from '@/lib/api/exercises'
@@ -33,6 +35,16 @@ export default function ActiveTrainingPage() {
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [showExerciseSelector, setShowExerciseSelector] = useState(false)
   const [exercisesLoading, setExercisesLoading] = useState(false)
+  const [workoutStartTime] = useState(Date.now())
+  
+  // Timer hooks
+  const {
+    currentExerciseTime,
+    totalWorkoutTime,
+    handleExerciseTimeUpdate,
+    resetExerciseTimer,
+    addToTotalTime
+  } = useExerciseTimer()
 
   // Cargar ejercicios
   useEffect(() => {
@@ -66,7 +78,28 @@ export default function ActiveTrainingPage() {
   )
 
   const handleCompleteWorkout = async () => {
-    await completeWorkout(0) // Sin duración por ahora
+    const totalDuration = Math.floor((Date.now() - workoutStartTime) / 1000)
+    await completeWorkout(totalDuration)
+  }
+
+  const handleExerciseComplete = () => {
+    if (selectedExercise && currentExerciseTime > 0) {
+      addToTotalTime(currentExerciseTime)
+      resetExerciseTimer()
+      setSelectedExercise(null)
+    }
+  }
+
+  const formatWorkoutDuration = () => {
+    const elapsed = Math.floor((Date.now() - workoutStartTime) / 1000)
+    const hours = Math.floor(elapsed / 3600)
+    const minutes = Math.floor((elapsed % 3600) / 60)
+    const seconds = elapsed % 60
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 
   const handlePauseWorkout = async () => {
@@ -221,28 +254,28 @@ export default function ActiveTrainingPage() {
         </Card>
 
         {/* Controles de Entrenamiento */}
-        <Card className="p-6">
+        <Card className="p-6 bg-background-tertiary border-border-secondary">
           <div className="space-y-4">
             <h4 className="font-medium text-white">Controles de Entrenamiento</h4>
             
-            <div className="flex gap-3">
+            <div className="grid gap-3 md:grid-cols-3">
               {/* Pausa/Reanudar */}
               {isActive ? (
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   onClick={handlePauseWorkout}
                   disabled={loading}
-                  className="flex-1"
+                  className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
                 >
-                  Pausar Entrenamiento
+                  Pausar
                 </Button>
               ) : isPaused ? (
                 <Button
                   onClick={handleResumeWorkout}
                   disabled={loading}
-                  className="flex-1"
+                  className="bg-accent-primary hover:bg-accent-hover"
                 >
-                  Reanudar Entrenamiento
+                  Reanudar
                 </Button>
               ) : null}
 
@@ -250,9 +283,9 @@ export default function ActiveTrainingPage() {
               <Button
                 onClick={handleCompleteWorkout}
                 disabled={loading}
-                className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                className="bg-green-500 hover:bg-green-600 text-white"
               >
-                Completar Entrenamiento
+                ✓ Completar
               </Button>
 
               {/* Cancelar */}
@@ -260,7 +293,7 @@ export default function ActiveTrainingPage() {
                 variant="outline"
                 onClick={handleCancelWorkout}
                 disabled={loading}
-                className="flex-1 border-slate-600 text-slate-400 hover:text-red-400 hover:border-red-500/50"
+                className="border-status-error/30 text-status-error hover:bg-status-error/10"
               >
                 Cancelar
               </Button>
